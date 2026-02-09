@@ -118,7 +118,8 @@ const bpmDecBtn = document.getElementById("bpm-dec");
 const bpmIncBtn = document.getElementById("bpm-inc");
 const metroBtn = document.getElementById("metro-btn");
 const metronomeLed = document.getElementById("metronome-led");
-const quantizeBtn = document.getElementById("quantize-btn");
+const quantizeSwitch = document.getElementById("quantize-switch");
+const quantizeLabels = quantizeSwitch.querySelectorAll(".q-label");
 const swingSwitch = document.getElementById("swing-switch");
 const swingLabels = swingSwitch.querySelectorAll(".swing-label");
 const recBtn = document.getElementById("rec-btn");
@@ -818,21 +819,32 @@ bpmDecBtn.addEventListener("click", () => setBpm(bpm - 1));
 bpmIncBtn.addEventListener("click", () => setBpm(bpm + 1));
 
 // ============================================================
-// QUANTIZE 2-POSITION TOGGLE (1/16 ↔ 1/32)
-// Always quantized — cycles between two grid resolutions.
+// QUANTIZE 3-POSITION TOGGLE SWITCH (1/8, 1/16, 1/32)
+// Always quantized — snaps between three grid resolutions.
 // ============================================================
 
-const quantizeLabelEl = document.getElementById("quantize-label");
+const QUANTIZE_VALUES = [8, 16, 32];
 
-function setQuantizeRes(res) {
-  quantizeRes = res;
-  quantizeBtn.classList.remove("q-16", "q-32");
-  quantizeBtn.classList.add(res === 32 ? "q-32" : "q-16");
-  quantizeLabelEl.textContent = "1/" + res;
+function setQuantizePosition(posIndex) {
+  const clamped = Math.max(0, Math.min(2, posIndex));
+  quantizeSwitch.dataset.position = clamped;
+  quantizeRes = QUANTIZE_VALUES[clamped];
 }
 
-quantizeBtn.addEventListener("click", () => {
-  setQuantizeRes(quantizeRes === 32 ? 16 : 32);
+// Click on track cycles to next position
+quantizeSwitch.querySelector(".q-track").addEventListener("click", () => {
+  const cur = parseInt(quantizeSwitch.dataset.position, 10);
+  setQuantizePosition((cur + 1) % 3);
+});
+
+// Click on individual labels snaps to that position
+quantizeLabels.forEach((lbl) => {
+  lbl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const val = parseInt(lbl.dataset.val, 10);
+    const idx = QUANTIZE_VALUES.indexOf(val);
+    if (idx !== -1) setQuantizePosition(idx);
+  });
 });
 
 // ============================================================
@@ -1075,9 +1087,10 @@ function scheduleNote(step, time) {
   }
 
   // ---- Drum Pattern: trigger TR steps at quantize-resolution boundaries ----
+  // 1/8  mode → fire every 4 internal steps (16 steps = 2 bars)
   // 1/16 mode → fire every 2 internal steps (16 steps = 1 bar)
-  // 1/32 mode → fire every internal step (16 steps = 2 beats)
-  const drumStepInterval = (quantizeRes === 32) ? 1 : STEPS_PER_SIXTEENTH;
+  // 1/32 mode → fire every 1 internal step  (16 steps = 2 beats)
+  const drumStepInterval = (quantizeRes === 32) ? 1 : (quantizeRes === 16) ? 2 : 4;
   if (barStep % drumStepInterval === 0) {
     const drumStepIndex = Math.floor(barStep / drumStepInterval) % SEQ_STEPS;
     for (let tr = 0; tr < DRUM_TRACKS; tr++) {
@@ -1212,14 +1225,10 @@ function recordEvent(sliceId) {
   const thirtySecondDur = secondsPerBeat / THIRTYSECONDS_PER_BEAT;
   const rawStep = elapsed / thirtySecondDur;
 
-  let step;
-  if (quantizeRes === 16) {
-    // Snap to nearest 1/16 note (every 2nd 1/32 step)
-    step = (Math.round(rawStep / 2) * 2) % TOTAL_STEPS;
-  } else {
-    // Snap to nearest 1/32 note
-    step = Math.round(rawStep) % TOTAL_STEPS;
-  }
+  // Snap factor: how many 1/32 steps make up the chosen grid division
+  // 1/8 = 4 thirty-seconds, 1/16 = 2, 1/32 = 1
+  const snapFactor = (quantizeRes === 8) ? 4 : (quantizeRes === 16) ? 2 : 1;
+  let step = (Math.round(rawStep / snapFactor) * snapFactor) % TOTAL_STEPS;
 
   // Clamp to valid range
   if (step < 0) step = 0;

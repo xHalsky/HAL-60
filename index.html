@@ -118,8 +118,17 @@
             <div id="metronome-led" title="Beat indicator"></div>
           </div>
           <div class="transport-group" id="quantize-group">
-            <button id="quantize-btn" class="q-32" title="Toggle quantize: 1/16 or 1/32">Q</button>
-            <span class="transport-label" id="quantize-label">1/32</span>
+            <label>Q</label>
+            <div id="quantize-switch" data-position="2" title="Quantize resolution: 1/8, 1/16, 1/32">
+              <div class="q-track">
+                <div class="q-cap"></div>
+              </div>
+              <div class="q-labels">
+                <span class="q-label" data-val="8">1/8</span>
+                <span class="q-label" data-val="16">1/16</span>
+                <span class="q-label" data-val="32">1/32</span>
+              </div>
+            </div>
           </div>
           <div class="transport-group" id="swing-group">
             <label>SWING</label>
