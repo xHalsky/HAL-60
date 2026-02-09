@@ -172,7 +172,7 @@ let regions = []; // { id, start, end, wsRegion }
 let bpm = 70;
 let isPlaying = false;
 let isRecording = false;
-let quantizeOn = true;
+let quantizeRes = 32; // Quantize resolution: 32 = 1/32, 16 = 1/16
 let swingPercent = 50; // 50 = no swing, up to 75
 
 // Metronome click (audio tick on every beat during playback / recording)
@@ -818,12 +818,21 @@ bpmDecBtn.addEventListener("click", () => setBpm(bpm - 1));
 bpmIncBtn.addEventListener("click", () => setBpm(bpm + 1));
 
 // ============================================================
-// QUANTIZE TOGGLE
+// QUANTIZE 2-POSITION TOGGLE (1/16 ↔ 1/32)
+// Always quantized — cycles between two grid resolutions.
 // ============================================================
 
+const quantizeLabelEl = document.getElementById("quantize-label");
+
+function setQuantizeRes(res) {
+  quantizeRes = res;
+  quantizeBtn.classList.remove("q-16", "q-32");
+  quantizeBtn.classList.add(res === 32 ? "q-32" : "q-16");
+  quantizeLabelEl.textContent = "1/" + res;
+}
+
 quantizeBtn.addEventListener("click", () => {
-  quantizeOn = !quantizeOn;
-  quantizeBtn.classList.toggle("active", quantizeOn);
+  setQuantizeRes(quantizeRes === 32 ? 16 : 32);
 });
 
 // ============================================================
@@ -1201,10 +1210,12 @@ function recordEvent(sliceId) {
   const rawStep = elapsed / thirtySecondDur;
 
   let step;
-  if (quantizeOn) {
-    step = Math.round(rawStep) % TOTAL_STEPS;
+  if (quantizeRes === 16) {
+    // Snap to nearest 1/16 note (every 2nd 1/32 step)
+    step = (Math.round(rawStep / 2) * 2) % TOTAL_STEPS;
   } else {
-    step = Math.floor(rawStep) % TOTAL_STEPS;
+    // Snap to nearest 1/32 note
+    step = Math.round(rawStep) % TOTAL_STEPS;
   }
 
   // Clamp to valid range

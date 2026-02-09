@@ -753,8 +753,8 @@ body {
     0 0 24px rgba(51, 255, 51, 0.15);
 }
 
-/* ---- Quantize Toggle Button ---- */
-/* Small square button to toggle quantize – hardware button style */
+/* ---- Quantize 2-Position Toggle Button ---- */
+/* Cycles between 1/16 and 1/32 quantization — always quantized */
 #quantize-btn {
   width: 32px;
   height: 32px;
@@ -767,7 +767,7 @@ body {
   font-size: 0.75rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.06s;
+  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.06s, text-shadow 0.1s;
   box-shadow:
     0 2px 0 #999990,
     0 3px 4px rgba(0, 0, 0, 0.2);
@@ -777,8 +777,20 @@ body {
   justify-content: center;
 }
 
-/* Active (quantize ON) state — orange plastic with matching 3D depth */
-#quantize-btn.active {
+/* 1/16 mode — dimmed orange, lower-intensity LED state */
+#quantize-btn.q-16 {
+  background: #cc9040;
+  color: #5a3a10;
+  border-color: #aa7030;
+  border-bottom: 3px solid #886020;
+  border-right: 2px solid #886020;
+  box-shadow:
+    0 2px 0 #886020,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 1/32 mode — bright orange with glowing text, high-res active state */
+#quantize-btn.q-32 {
   background: #ffb347;
   color: #333333;
   border-color: #cc8800;
@@ -787,6 +799,7 @@ body {
   box-shadow:
     0 2px 0 #996600,
     0 3px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 0 6px rgba(255, 179, 71, 0.6);
 }
 
 /* Pressed quantize button */
