@@ -69,6 +69,7 @@ const padGrid = document.getElementById("pad-grid");
 // Transport
 const bpmInput = document.getElementById("bpm-input");
 const bpmSlider = document.getElementById("bpm-slider");
+const metroBtn = document.getElementById("metro-btn");
 const metronomeLed = document.getElementById("metronome-led");
 const quantizeBtn = document.getElementById("quantize-btn");
 const swingSlider = document.getElementById("swing-slider");
@@ -112,11 +113,14 @@ let wsRegions = null;
 let regions = []; // { id, start, end, wsRegion }
 
 // Sequencer
-let bpm = 120;
+let bpm = 70;
 let isPlaying = false;
 let isRecording = false;
 let quantizeOn = true;
 let swingPercent = 50; // 50 = no swing, up to 75
+
+// Metronome click (audio tick on every beat during playback / recording)
+let metronomeEnabled = false;
 
 // Count-in (4-beat pre-roll before recording)
 let isCountingIn = false;
@@ -565,7 +569,7 @@ bumpSlider.addEventListener("input", () => {
 // ============================================================
 
 function setBpm(val) {
-  bpm = Math.max(60, Math.min(200, Number(val) || 120));
+  bpm = Math.max(60, Math.min(90, Number(val) || 70));
   bpmInput.value = bpm;
   bpmSlider.value = bpm;
   // Update LCD BPM display
@@ -593,6 +597,18 @@ quantizeBtn.addEventListener("click", () => {
 swingSlider.addEventListener("input", () => {
   swingPercent = parseInt(swingSlider.value, 10);
   swingValueEl.textContent = swingPercent + "%";
+});
+
+// ============================================================
+// METRONOME CLICK TOGGLE
+// Toggles the audio metronome (digital tick on every beat).
+// The metronome works during both Play and Record modes as
+// a standalone timing tool — no sequence data required.
+// ============================================================
+
+metroBtn.addEventListener("click", () => {
+  metronomeEnabled = !metronomeEnabled;
+  metroBtn.classList.toggle("active", metronomeEnabled);
 });
 
 // ============================================================
@@ -761,10 +777,18 @@ function nextNote() {
 
 // ---- Schedule a note (audio + deferred visual + note repeat) ----
 function scheduleNote(step, time) {
-  // Flash metronome on every beat (every 8 thirty-seconds = 1 quarter note)
+  // Every quarter-note beat (every 8 thirty-seconds)
   if (step % THIRTYSECONDS_PER_BEAT === 0) {
-    const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
-    setTimeout(() => flashMetronome(), delay);
+    if (metronomeEnabled) {
+      // Determine if this is the first beat of a bar (downbeat = 2400 Hz)
+      const stepsPerBar = THIRTYSECONDS_PER_BEAT * BEATS_PER_BAR;
+      const isDownbeat = (step % stepsPerBar === 0);
+      playMetronomeTick(time, isDownbeat);
+
+      // Flash the metronome LED in sync with the audio tick
+      const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
+      setTimeout(() => flashMetronome(), delay);
+    }
   }
 
   // Play the sequenced slice if one exists at this step
