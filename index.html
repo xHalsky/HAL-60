@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SlicePad – 16-Pad Audio Sampler</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- App wrapper -->
+  <div id="app">
+
+    <!-- 8-bar loop progress bar with 1/32nd-note grid ticks -->
+    <div id="loop-progress">
+      <div id="loop-progress-fill"></div>
+      <div id="loop-progress-ticks">
+        <!-- 256 tick marks will be injected by JS -->
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header id="header">
+      <h1>SlicePad</h1>
+      <span class="subtitle">16-Pad Audio Sampler</span>
+    </header>
+
+    <!-- Transport Controls: BPM, Metronome, Quantize, Swing, Rec/Play/Stop -->
+    <section id="transport-section">
+
+      <!-- BPM control group -->
+      <div class="transport-group" id="bpm-group">
+        <label for="bpm-input">BPM</label>
+        <input type="number" id="bpm-input" min="60" max="200" value="120" step="1" />
+        <input type="range" id="bpm-slider" min="60" max="200" value="120" step="1" />
+      </div>
+
+      <!-- Visual Metronome LED -->
+      <div id="metronome-led" title="Beat indicator"></div>
+
+      <!-- Quantize toggle -->
+      <div class="transport-group" id="quantize-group">
+        <button id="quantize-btn" class="active" title="Snap recorded hits to 1/32 grid">Q</button>
+        <span class="transport-label">1/32</span>
+      </div>
+
+      <!-- Swing control -->
+      <div class="transport-group" id="swing-group">
+        <label for="swing-slider">Swing</label>
+        <input type="range" id="swing-slider" min="50" max="75" value="50" step="1" />
+        <span id="swing-value">50%</span>
+      </div>
+
+      <!-- Note Repeat toggle -->
+      <div class="transport-group" id="note-repeat-group">
+        <button id="note-repeat-btn" title="Note Repeat: auto-retrigger held pads on 1/32 grid (hold Shift = momentary)">NR</button>
+        <span class="transport-label">REPEAT</span>
+      </div>
+
+      <!-- Transport buttons: Record, Play, Stop, Clear -->
+      <div id="transport-buttons">
+        <button id="rec-btn" title="Record pad hits into the loop">&#9679; REC</button>
+        <button id="play-btn" title="Play / loop the sequence">&#9654; PLAY</button>
+        <button id="stop-btn" title="Stop playback">&#9632; STOP</button>
+        <button id="clear-btn" title="Clear sequence">CLR</button>
+      </div>
+
+    </section>
+
+    <!-- Top Section: Waveform Display -->
+    <section id="waveform-section">
+      <div id="waveform-toolbar">
+        <button id="load-btn" title="Load an audio file">
+          <span class="icon">&#9654;</span> Load Sample
+        </button>
+        <input type="file" id="file-input" accept="audio/*" hidden />
+        <span id="file-name">No file loaded</span>
+      </div>
+      <div id="drop-zone">
+        <div id="drop-zone-text">
+          <p>Drop an audio file here<br /><small>or click "Load Sample"</small></p>
+        </div>
+        <div id="waveform"></div>
+      </div>
+    </section>
+
+    <!-- Middle Section: Global Pitch Slider -->
+    <section id="pitch-section">
+      <label for="pitch-slider">Pitch / Transpose</label>
+      <div id="pitch-control">
+        <span class="pitch-label">-12</span>
+        <input
+          type="range"
+          id="pitch-slider"
+          min="-12"
+          max="12"
+          value="0"
+          step="1"
+        />
+        <span class="pitch-label">+12</span>
+      </div>
+      <div id="pitch-value">0 st</div>
+    </section>
+
+    <!-- Bottom Section: 4x4 Pad Grid -->
+    <section id="pads-section">
+      <div id="pad-grid">
+        <!-- Pads 1–16 will be injected by JS -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Wavesurfer.js v7 via CDN (ES module) -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
