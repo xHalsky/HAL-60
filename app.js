@@ -83,6 +83,9 @@ const clearBtn = document.getElementById("clear-btn");
 const progressFill = document.getElementById("loop-progress-fill");
 const progressTicksContainer = document.getElementById("loop-progress-ticks");
 
+// Count-in overlay
+const countInDisplay = document.getElementById("count-in-display");
+
 // ============================================================
 // STATE
 // ============================================================
@@ -100,6 +103,9 @@ let masterGainNode = null;
 let compressorNode = null;
 let bumpAmount = 24; // Compressor threshold = -(bumpAmount) dB; 0 = off, 60 = max
 
+// Metronome gain node: routed directly to destination (bypasses the compressor)
+let metronomeGainNode = null;
+
 // Wavesurfer
 let wavesurfer = null;
 let wsRegions = null;
@@ -111,6 +117,12 @@ let isPlaying = false;
 let isRecording = false;
 let quantizeOn = true;
 let swingPercent = 50; // 50 = no swing, up to 75
+
+// Count-in (4-beat pre-roll before recording)
+let isCountingIn = false;
+let countInStep = 0;                 // 0-3 (four beats)
+let countInNextTime = 0.0;
+let countInTimerID = null;
 
 // Note Repeat
 let noteRepeatToggled = false;       // Latching toggle via the NR button
@@ -378,6 +390,11 @@ function ensureAudioContext() {
 
     masterGainNode.connect(compressorNode);
     compressorNode.connect(audioCtx.destination);
+
+    // ---- Metronome Output (separate path, bypasses compressor) ----
+    metronomeGainNode = audioCtx.createGain();
+    metronomeGainNode.gain.value = 1.0;
+    metronomeGainNode.connect(audioCtx.destination);
   }
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -455,6 +472,32 @@ function stopCurrent(atTime) {
     padElements[activePadIndex].classList.remove("active");
   }
   activePadIndex = -1;
+}
+
+// ============================================================
+// DIGITAL "TICK" SYNTHESIZER (Count-In Metronome)
+// Uses an OscillatorNode so it's always "ready" with zero latency.
+// 2400 Hz = the "One" (downbeat), 1800 Hz = regular tick.
+// Routed through metronomeGainNode (bypasses compressor).
+// ============================================================
+
+function playMetronomeTick(time, isDownbeat) {
+  ensureAudioContext();
+
+  const freq = isDownbeat ? 2400 : 1800;
+
+  const osc = audioCtx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  // Sharp digital blip with 0.05s decay envelope
+  const envGain = audioCtx.createGain();
+  envGain.gain.setValueAtTime(0.6, time);
+  envGain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+
+  osc.connect(envGain).connect(metronomeGainNode);
+  osc.start(time);
+  osc.stop(time + 0.06);
 }
 
 // ============================================================
@@ -584,6 +627,94 @@ window.addEventListener("blur", () => {
 });
 
 // ============================================================
+// COUNT-IN ENGINE — 4-Beat Pre-Roll Before Recording
+// Uses the same look-ahead scheduler pattern for precise timing.
+// Plays 4 digital ticks, displays a countdown (4→3→2→1),
+// then hands off to the main sequencer to begin recording.
+// ============================================================
+
+function startCountIn() {
+  ensureAudioContext();
+
+  isCountingIn = true;
+  countInStep = 0;
+  countInNextTime = audioCtx.currentTime;
+
+  // Show the count-in overlay on the LCD
+  countInDisplay.textContent = "";
+  countInDisplay.style.display = "flex";
+
+  // Ensure progress bar stays at 0 during count-in
+  progressFill.style.width = "0%";
+
+  countInScheduler();
+}
+
+function countInScheduler() {
+  while (countInNextTime < audioCtx.currentTime + scheduleAheadTime) {
+    if (countInStep >= 4) {
+      // All 4 count-in beats have been scheduled.
+      // Transition to the main recording loop exactly on the next downbeat.
+      isCountingIn = false;
+
+      // Hide the count-in overlay at the exact moment recording starts
+      const hideDelay = Math.max(0, (countInNextTime - audioCtx.currentTime) * 1000);
+      setTimeout(() => {
+        countInDisplay.style.display = "none";
+      }, hideDelay);
+
+      // Start recording + playback precisely at the next beat boundary
+      isPlaying = true;
+      isRecording = true;
+      playBtn.classList.add("active");
+
+      currentStep = 0;
+      nextNoteTime = countInNextTime;
+      loopStartTime = countInNextTime;
+
+      // Switch from count-in timer to main scheduler
+      if (countInTimerID !== null) {
+        clearTimeout(countInTimerID);
+        countInTimerID = null;
+      }
+
+      scheduler();
+      startVisualLoop();
+      return;
+    }
+
+    // Schedule the tick sound (beat 0 = accented "One" at 2400 Hz)
+    const isDownbeat = (countInStep === 0);
+    playMetronomeTick(countInNextTime, isDownbeat);
+
+    // Schedule visual update: countdown number + metronome flash
+    const displayNum = 4 - countInStep;
+    const visualDelay = Math.max(0, (countInNextTime - audioCtx.currentTime) * 1000);
+    setTimeout(() => {
+      countInDisplay.textContent = displayNum.toString();
+      flashMetronome();
+    }, visualDelay);
+
+    // Advance to the next beat
+    const secondsPerBeat = 60.0 / bpm;
+    countInNextTime += secondsPerBeat;
+    countInStep++;
+  }
+
+  countInTimerID = window.setTimeout(countInScheduler, lookahead);
+}
+
+function stopCountIn() {
+  isCountingIn = false;
+  countInStep = 0;
+  if (countInTimerID !== null) {
+    clearTimeout(countInTimerID);
+    countInTimerID = null;
+  }
+  countInDisplay.style.display = "none";
+}
+
+// ============================================================
 // SEQUENCER ENGINE — "Golden Standard" Look-Ahead Scheduler
 // ============================================================
 
@@ -703,6 +834,9 @@ function stopPlayback() {
   isPlaying = false;
   isRecording = false;
 
+  // Cancel any active count-in
+  stopCountIn();
+
   playBtn.classList.remove("active");
   recBtn.classList.remove("active");
 
@@ -716,14 +850,23 @@ function stopPlayback() {
   progressFill.style.width = "0%";
 }
 
-// ---- Toggle recording ----
+// ---- Toggle recording (with 4-beat count-in pre-roll) ----
 function toggleRecord() {
-  if (!isRecording) {
-    isRecording = true;
-    recBtn.classList.add("active");
-    // Auto-start playback when record is engaged
-    if (!isPlaying) startPlayback();
+  if (!isRecording && !isCountingIn) {
+    if (isPlaying) {
+      // Already playing → engage recording immediately (overdub, no count-in)
+      isRecording = true;
+      recBtn.classList.add("active");
+    } else {
+      // Not playing → start a 4-beat count-in, then begin recording
+      recBtn.classList.add("active");
+      startCountIn();
+    }
   } else {
+    // Stop recording or cancel an in-progress count-in
+    if (isCountingIn) {
+      stopCountIn();
+    }
     isRecording = false;
     recBtn.classList.remove("active");
   }
