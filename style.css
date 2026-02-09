@@ -643,12 +643,12 @@ body {
 
 /* BPM Data Entry Buttons — tactile cream-colored +/- buttons */
 .data-entry-btn {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 32px;
   border-radius: 3px;
   border: 1px solid #888880;
   border-bottom: 3px solid #999999;
-  border-right: 3px solid #999999;
+  border-right: 2px solid #999999;
   background: #e6e6dc;
   color: #333333;
   font-size: 1rem;
@@ -668,7 +668,7 @@ body {
 
 /* Pressed state for Data Entry buttons */
 .data-entry-btn:active {
-  transform: translateY(1px);
+  transform: translateY(2px);
   border-bottom-width: 1px;
   border-right-width: 1px;
   box-shadow: 0 0px 0 #999990;
@@ -682,21 +682,27 @@ body {
 
 /* Metronome toggle button — cream 80s hardware switch */
 #metro-btn {
-  padding: 4px 8px;
-  border-radius: 4px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 3px;
   border: 1px solid #888880;
+  border-bottom: 3px solid #999999;
+  border-right: 2px solid #999999;
   background: #e6e6dc;
   color: #666666;
   font-size: 0.6rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.06s;
   box-shadow:
     0 2px 0 #999990,
     0 3px 4px rgba(0, 0, 0, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Active state — lit pixel green when click is enabled */
@@ -704,6 +710,8 @@ body {
   background: #33ff33;
   color: #1a2b1a;
   border-color: #22aa22;
+  border-bottom: 3px solid #116611;
+  border-right: 2px solid #116611;
   box-shadow:
     0 2px 0 #116611,
     0 0 6px rgba(51, 255, 51, 0.3),
@@ -712,8 +720,10 @@ body {
 
 /* Pressed state for metronome button */
 #metro-btn:active {
-  box-shadow: 0 0px 0 #999990;
   transform: translateY(2px);
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+  box-shadow: 0 0px 0 #999990;
 }
 
 #metro-btn:hover {
@@ -746,27 +756,34 @@ body {
 /* ---- Quantize Toggle Button ---- */
 /* Small square button to toggle quantize – hardware button style */
 #quantize-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
   border: 1px solid #888880;
+  border-bottom: 3px solid #999999;
+  border-right: 2px solid #999999;
   background: #e6e6dc;
   color: #666666;
   font-size: 0.75rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.06s;
   box-shadow:
     0 2px 0 #999990,
     0 3px 4px rgba(0, 0, 0, 0.2);
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Active (quantize ON) state */
+/* Active (quantize ON) state — orange plastic with matching 3D depth */
 #quantize-btn.active {
-  background: #ffaa00;
+  background: #ffb347;
   color: #333333;
   border-color: #cc8800;
+  border-bottom: 3px solid #996600;
+  border-right: 2px solid #996600;
   box-shadow:
     0 2px 0 #996600,
     0 3px 4px rgba(0, 0, 0, 0.2);
@@ -774,104 +791,93 @@ body {
 
 /* Pressed quantize button */
 #quantize-btn:active {
-  box-shadow: 0 0px 0 #999990;
   transform: translateY(2px);
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+  box-shadow: 0 0px 0 #999990;
 }
 
 #quantize-btn:hover {
   border-color: #666660;
 }
 
-/* ---- Note Repeat Button ---- */
-/* Prominent toggle that lights up red when Note Repeat is active.
-   When on, held pads auto-retrigger at the current grid rate. */
-#note-repeat-btn {
-  width: 28px;
-  height: 28px;
+/* ---- Swing 3-Position Toggle Switch ---- */
+
+/* Switch container — stacks track and labels vertically */
+#swing-switch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+/* Recessed dark track that holds the sliding cap */
+.swing-track {
+  width: 56px;
+  height: 16px;
+  background: #222222;
   border-radius: 4px;
+  position: relative;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid #1a1a1a;
+}
+
+/* Cream sliding cap — snaps to 3 positions */
+.swing-cap {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 10px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f0f0e8 0%, #d8d8d0 50%, #e6e6dc 100%);
   border: 1px solid #888880;
-  background: #e6e6dc;
-  color: #666666;
-  font-size: 0.65rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+  border-bottom: 2px solid #999999;
   box-shadow:
-    0 2px 0 #999990,
-    0 3px 4px rgba(0, 0, 0, 0.2);
-  text-transform: uppercase;
+    0 1px 3px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: left 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Active state – lights up red */
-#note-repeat-btn.active {
-  background: #ff3333;
-  color: #ffffff;
-  border-color: #cc2222;
-  box-shadow:
-    0 2px 0 #991111,
-    0 0 8px rgba(255, 51, 51, 0.4),
-    0 3px 4px rgba(0, 0, 0, 0.2);
+/* Cap positions (set via JS data-position attribute) */
+#swing-switch[data-position="0"] .swing-cap {
+  left: 2px;
 }
 
-/* Pressed note repeat button */
-#note-repeat-btn:active {
-  box-shadow: 0 0px 0 #999990;
-  transform: translateY(2px);
+#swing-switch[data-position="1"] .swing-cap {
+  left: 19px;
 }
 
-#note-repeat-btn:hover {
-  border-color: #666660;
+#swing-switch[data-position="2"] .swing-cap {
+  left: 36px;
 }
 
-/* ---- Swing Group ---- */
-
-/* Swing range slider */
-#swing-slider {
-  width: 60px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #888880;
-  outline: none;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+/* Position labels row beneath the track */
+.swing-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 56px;
 }
 
-/* Swing slider knob (physical gray knob) */
-#swing-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
-  cursor: pointer;
-  border: 2px solid #555555;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
-}
-
-#swing-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
-  cursor: pointer;
-  border: 2px solid #555555;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Swing readout value */
-#swing-value {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 0.72rem;
+/* Individual position label */
+.swing-label {
+  font-size: 0.5rem;
   font-weight: 700;
-  color: #444444;
-  min-width: 30px;
+  color: #555555;
   text-align: center;
+  width: 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Highlight the active label */
+#swing-switch[data-position="0"] .swing-label[data-val="50"],
+#swing-switch[data-position="1"] .swing-label[data-val="60"],
+#swing-switch[data-position="2"] .swing-label[data-val="70"] {
+  color: #222222;
 }
 
 /* ---- Row 2: Transport Buttons (Rec, Play, Stop, Clear) ---- */
@@ -1229,8 +1235,7 @@ body {
   color: #333333;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-align: right;
-  padding-right: 6px;
+  text-align: left;
 }
 
 /* 16-step grid container per track — fills remaining width */

@@ -119,8 +119,8 @@ const bpmIncBtn = document.getElementById("bpm-inc");
 const metroBtn = document.getElementById("metro-btn");
 const metronomeLed = document.getElementById("metronome-led");
 const quantizeBtn = document.getElementById("quantize-btn");
-const swingSlider = document.getElementById("swing-slider");
-const swingValueEl = document.getElementById("swing-value");
+const swingSwitch = document.getElementById("swing-switch");
+const swingLabels = swingSwitch.querySelectorAll(".swing-label");
 const recBtn = document.getElementById("rec-btn");
 const playBtn = document.getElementById("play-btn");
 const stopBtn = document.getElementById("stop-btn");
@@ -827,12 +827,32 @@ quantizeBtn.addEventListener("click", () => {
 });
 
 // ============================================================
-// SWING CONTROL
+// SWING 3-POSITION TOGGLE SWITCH
+// Three fixed values: 50% (straight), 60% (shuffle), 70% (heavy)
 // ============================================================
 
-swingSlider.addEventListener("input", () => {
-  swingPercent = parseInt(swingSlider.value, 10);
-  swingValueEl.textContent = swingPercent + "%";
+const SWING_VALUES = [50, 60, 70];
+
+function setSwingPosition(posIndex) {
+  const clamped = Math.max(0, Math.min(2, posIndex));
+  swingSwitch.dataset.position = clamped;
+  swingPercent = SWING_VALUES[clamped];
+}
+
+// Click on track cycles to next position
+swingSwitch.querySelector(".swing-track").addEventListener("click", () => {
+  const cur = parseInt(swingSwitch.dataset.position, 10);
+  setSwingPosition((cur + 1) % 3);
+});
+
+// Click on individual labels snaps to that position
+swingLabels.forEach((lbl) => {
+  lbl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const val = parseInt(lbl.dataset.val, 10);
+    const idx = SWING_VALUES.indexOf(val);
+    if (idx !== -1) setSwingPosition(idx);
+  });
 });
 
 // ============================================================

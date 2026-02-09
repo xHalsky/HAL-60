@@ -122,9 +122,17 @@
             <span class="transport-label">1/32</span>
           </div>
           <div class="transport-group" id="swing-group">
-            <label for="swing-slider">SWING</label>
-            <input type="range" id="swing-slider" min="50" max="75" value="50" step="1" />
-            <span id="swing-value">50%</span>
+            <label>SWING</label>
+            <div id="swing-switch" data-position="0" title="Swing amount: 50 / 60 / 70">
+              <div class="swing-track">
+                <div class="swing-cap"></div>
+              </div>
+              <div class="swing-labels">
+                <span class="swing-label" data-val="50">50</span>
+                <span class="swing-label" data-val="60">60</span>
+                <span class="swing-label" data-val="70">70</span>
+              </div>
+            </div>
           </div>
           <!-- Mode toggle: PAD grid ↔ TR-style Step Sequencer -->
           <div class="transport-group" id="mode-switch-group">
