@@ -3,7 +3,8 @@
 // Wavesurfer.js v7 (ES module) + Web Audio API
 // Features: 16-pad sampler, mute-group, 4-bar loop recorder,
 //           quantize (1/32), MPC-style swing, visual metronome,
-//           MPC-style note repeat (Shift = momentary).
+//           note repeat (Shift = momentary),
+//           4-track TR-style step sequencer with drum synthesis.
 // Visual: MPC 60 vintage aesthetic with dot-matrix LCD.
 // ============================================================
 
@@ -21,6 +22,12 @@ const THIRTYSECONDS_PER_BEAT = 8;    // 1/32-note resolution per beat
 const SIXTEENTHS_PER_BEAT = 4;       // Used for swing grouping (16th-note level)
 const STEPS_PER_SIXTEENTH = 2;       // Two 32nds make one 16th
 const TOTAL_STEPS = BARS * BEATS_PER_BAR * THIRTYSECONDS_PER_BEAT; // 128
+
+// TR Step Sequencer constants
+const DRUM_TRACKS = 4;
+const SEQ_STEPS = 16;
+const TRACK_NAMES = ["KICK", "SNARE", "HIHAT", "CYMBAL"];
+const BANK_NAMES = ["A", "B", "C", "D"];
 
 // Per-pad region colours – pixel-green shades for the LCD display
 const PAD_COLORS = [
@@ -40,6 +47,43 @@ const PAD_COLORS = [
   "rgba(51, 255, 51, 0.14)",
   "rgba(51, 255, 51, 0.10)",
   "rgba(51, 255, 51, 0.13)",
+];
+
+// ============================================================
+// DRUM BANK DEFINITIONS
+// Four internal banks (A–D) with different synthesis parameters
+// for each of the four drum voices.
+// ============================================================
+
+const DRUM_BANKS = [
+  {
+    name: "A",
+    kick:   { freq: 150, endFreq: 40, decay: 0.3, tone: 0.8 },
+    snare:  { toneFreq: 180, noiseDecay: 0.15, filterFreq: 3000, tone: 0.5 },
+    hihat:  { filterFreq: 8000, decay: 0.05, q: 1 },
+    cymbal: { filterFreq: 5000, decay: 0.4, q: 1 },
+  },
+  {
+    name: "B",
+    kick:   { freq: 180, endFreq: 35, decay: 0.4, tone: 0.9 },
+    snare:  { toneFreq: 200, noiseDecay: 0.2, filterFreq: 4000, tone: 0.6 },
+    hihat:  { filterFreq: 9000, decay: 0.04, q: 1.5 },
+    cymbal: { filterFreq: 6000, decay: 0.5, q: 1.5 },
+  },
+  {
+    name: "C",
+    kick:   { freq: 120, endFreq: 50, decay: 0.25, tone: 0.7 },
+    snare:  { toneFreq: 160, noiseDecay: 0.12, filterFreq: 2500, tone: 0.4 },
+    hihat:  { filterFreq: 10000, decay: 0.03, q: 2 },
+    cymbal: { filterFreq: 7000, decay: 0.35, q: 0.8 },
+  },
+  {
+    name: "D",
+    kick:   { freq: 200, endFreq: 30, decay: 0.5, tone: 1.0 },
+    snare:  { toneFreq: 220, noiseDecay: 0.25, filterFreq: 3500, tone: 0.7 },
+    hihat:  { filterFreq: 7000, decay: 0.06, q: 0.8 },
+    cymbal: { filterFreq: 4500, decay: 0.6, q: 1.2 },
+  },
 ];
 
 // ============================================================
@@ -70,14 +114,13 @@ const padGrid = document.getElementById("pad-grid");
 
 // Transport
 const bpmInput = document.getElementById("bpm-input");
-const bpmDec = document.getElementById("bpm-dec");
-const bpmInc = document.getElementById("bpm-inc");
+const bpmDecBtn = document.getElementById("bpm-dec");
+const bpmIncBtn = document.getElementById("bpm-inc");
 const metroBtn = document.getElementById("metro-btn");
 const metronomeLed = document.getElementById("metronome-led");
 const quantizeBtn = document.getElementById("quantize-btn");
 const swingSlider = document.getElementById("swing-slider");
 const swingValueEl = document.getElementById("swing-value");
-const noteRepeatBtn = document.getElementById("note-repeat-btn");
 const recBtn = document.getElementById("rec-btn");
 const playBtn = document.getElementById("play-btn");
 const stopBtn = document.getElementById("stop-btn");
@@ -89,6 +132,16 @@ const progressTicksContainer = document.getElementById("loop-progress-ticks");
 
 // Count-in overlay
 const countInDisplay = document.getElementById("count-in-display");
+
+// Mode switch (pad ↔ step sequencer)
+const modeSwitch = document.getElementById("mode-switch");
+const padsSection = document.getElementById("pads-section");
+const stepSeqContainer = document.getElementById("step-sequencer");
+
+// Bank selector (LCD)
+const bankDecBtn = document.getElementById("bank-dec");
+const bankIncBtn = document.getElementById("bank-inc");
+const bankValueEl = document.getElementById("bank-value");
 
 // ============================================================
 // STATE
@@ -131,9 +184,8 @@ let countInStep = 0;                 // 0-3 (four beats)
 let countInNextTime = 0.0;
 let countInTimerID = null;
 
-// Note Repeat
-let noteRepeatToggled = false;       // Latching toggle via the NR button
-let shiftHeld = false;               // Momentary via Shift key
+// Note Repeat (Shift key = momentary; no toggle button — switch is used for mode)
+let shiftHeld = false;
 const mousePressedPads = new Set();  // Pads held via mouse / touch
 const keyPressedPads = new Set();    // Pads held via keyboard
 
@@ -153,6 +205,15 @@ let animFrameID = null;
 
 // Tick elements (for grid flash)
 let tickElements = [];
+
+// Step Sequencer / Drum Machine
+let seqMode = false;
+let drumPattern = Array.from({ length: DRUM_TRACKS }, () => new Array(SEQ_STEPS).fill(false));
+let drumTrackVol = [80, 80, 80, 80];
+let drumTrackPitch = [0, 0, 0, 0];
+let currentDrumBank = 0;
+let noiseBuffer = null;
+let drumGainNodes = [null, null, null, null];
 
 // ============================================================
 // BUILD 16-PAD GRID
@@ -188,6 +249,133 @@ for (let i = 0; i < NUM_PADS; i++) {
   padGrid.appendChild(pad);
   padElements.push(pad);
 }
+
+// ============================================================
+// BUILD STEP SEQUENCER DOM
+// 4 tracks × 16 steps, with VOL/PITCH dials per track.
+// ============================================================
+
+const seqStepElements = []; // [track][step] for quick playhead access
+
+function buildDial(label, initialVal, onChange, min, max, step) {
+  const dial = document.createElement("div");
+  dial.className = "seq-dial";
+
+  const lbl = document.createElement("span");
+  lbl.className = "seq-dial-label";
+  lbl.textContent = label;
+  dial.appendChild(lbl);
+
+  const decBtn = document.createElement("button");
+  decBtn.className = "seq-dial-btn";
+  decBtn.textContent = "\u2212";
+  dial.appendChild(decBtn);
+
+  const valSpan = document.createElement("span");
+  valSpan.className = "seq-dial-val";
+  valSpan.textContent = initialVal;
+  dial.appendChild(valSpan);
+
+  const incBtn = document.createElement("button");
+  incBtn.className = "seq-dial-btn";
+  incBtn.textContent = "+";
+  dial.appendChild(incBtn);
+
+  decBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    let v = parseInt(valSpan.textContent, 10) - step;
+    v = Math.max(min, Math.min(max, v));
+    valSpan.textContent = v;
+    onChange(v);
+  });
+
+  incBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    let v = parseInt(valSpan.textContent, 10) + step;
+    v = Math.max(min, Math.min(max, v));
+    valSpan.textContent = v;
+    onChange(v);
+  });
+
+  return dial;
+}
+
+function buildStepSequencer() {
+  stepSeqContainer.innerHTML = "";
+  seqStepElements.length = 0;
+
+  for (let tr = 0; tr < DRUM_TRACKS; tr++) {
+    seqStepElements.push([]);
+    const row = document.createElement("div");
+    row.className = "seq-track";
+
+    // ---- Track info panel ----
+    const info = document.createElement("div");
+    info.className = "seq-track-info";
+
+    const name = document.createElement("span");
+    name.className = "seq-track-name";
+    name.textContent = TRACK_NAMES[tr];
+    info.appendChild(name);
+
+    const dials = document.createElement("div");
+    dials.className = "seq-dials";
+
+    // Volume dial (0-100, step 5)
+    const volDial = buildDial("V", drumTrackVol[tr], (val) => {
+      drumTrackVol[tr] = val;
+      if (drumGainNodes[tr]) {
+        drumGainNodes[tr].gain.value = val / 100;
+      }
+    }, 0, 100, 5);
+    dials.appendChild(volDial);
+
+    // Pitch dial (-12 to +12, step 1)
+    const pitDial = buildDial("P", drumTrackPitch[tr], (val) => {
+      drumTrackPitch[tr] = val;
+    }, -12, 12, 1);
+    dials.appendChild(pitDial);
+
+    info.appendChild(dials);
+    row.appendChild(info);
+
+    // ---- 16 step buttons ----
+    const steps = document.createElement("div");
+    steps.className = "seq-steps";
+
+    for (let s = 0; s < SEQ_STEPS; s++) {
+      const stepEl = document.createElement("div");
+      stepEl.className = "seq-step";
+      stepEl.dataset.step = s;
+      stepEl.dataset.track = tr;
+
+      // Color grouping: alternate blocks of 4
+      stepEl.classList.add(Math.floor(s / 4) % 2 === 0 ? "seq-step-a" : "seq-step-b");
+
+      const led = document.createElement("div");
+      led.className = "seq-step-led";
+      stepEl.appendChild(led);
+
+      // Click handler: toggle step on/off + preview sound
+      stepEl.addEventListener("click", () => {
+        ensureAudioContext();
+        drumPattern[tr][s] = !drumPattern[tr][s];
+        stepEl.classList.toggle("active", drumPattern[tr][s]);
+        if (drumPattern[tr][s]) {
+          playDrumSound(tr, audioCtx.currentTime);
+        }
+      });
+
+      steps.appendChild(stepEl);
+      seqStepElements[tr].push(stepEl);
+    }
+
+    row.appendChild(steps);
+    stepSeqContainer.appendChild(row);
+  }
+}
+
+buildStepSequencer();
 
 // ============================================================
 // BUILD PROGRESS BAR TICK MARKS (128 × 1/32nd note grid, 4 bars)
@@ -402,6 +590,13 @@ function ensureAudioContext() {
     metronomeGainNode = audioCtx.createGain();
     metronomeGainNode.gain.value = 1.0;
     metronomeGainNode.connect(audioCtx.destination);
+
+    // ---- Drum Track Gain Nodes (per-track volume → master compressor) ----
+    for (let i = 0; i < DRUM_TRACKS; i++) {
+      drumGainNodes[i] = audioCtx.createGain();
+      drumGainNodes[i].gain.value = drumTrackVol[i] / 100;
+      drumGainNodes[i].connect(masterGainNode);
+    }
   }
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -508,6 +703,106 @@ function playMetronomeTick(time, isDownbeat) {
 }
 
 // ============================================================
+// DRUM SYNTHESIS — TR-808 Style
+// Web Audio API oscillators and noise for kick, snare, hihat,
+// and cymbal.  Routed through per-track gain nodes so each
+// track has independent volume.
+// ============================================================
+
+function getNoiseBuffer() {
+  if (noiseBuffer) return noiseBuffer;
+  const size = audioCtx.sampleRate * 2;
+  noiseBuffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < size; i++) data[i] = Math.random() * 2 - 1;
+  return noiseBuffer;
+}
+
+function synthKick(time, params, vol, pitchMult) {
+  const osc = audioCtx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(params.freq * pitchMult, time);
+  osc.frequency.exponentialRampToValueAtTime(
+    Math.max(10, params.endFreq * pitchMult), time + 0.08
+  );
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol * params.tone, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + params.decay);
+  osc.connect(gain).connect(drumGainNodes[0]);
+  osc.start(time);
+  osc.stop(time + params.decay + 0.01);
+}
+
+function synthSnare(time, params, vol, pitchMult) {
+  // Tone body
+  const osc = audioCtx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.value = params.toneFreq * pitchMult;
+  const oscGain = audioCtx.createGain();
+  oscGain.gain.setValueAtTime(vol * params.tone, time);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+  osc.connect(oscGain).connect(drumGainNodes[1]);
+  osc.start(time);
+  osc.stop(time + 0.11);
+
+  // Noise snap
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = getNoiseBuffer();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.value = params.filterFreq * pitchMult;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(vol, time);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, time + params.noiseDecay);
+  noise.connect(filter).connect(noiseGain).connect(drumGainNodes[1]);
+  noise.start(time);
+  noise.stop(time + params.noiseDecay + 0.01);
+}
+
+function synthHiHat(time, params, vol, pitchMult) {
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = getNoiseBuffer();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = params.filterFreq * pitchMult;
+  filter.Q.value = params.q;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol * 0.5, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + params.decay);
+  noise.connect(filter).connect(gain).connect(drumGainNodes[2]);
+  noise.start(time);
+  noise.stop(time + params.decay + 0.01);
+}
+
+function synthCymbal(time, params, vol, pitchMult) {
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = getNoiseBuffer();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.value = params.filterFreq * pitchMult;
+  filter.Q.value = params.q;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol * 0.4, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + params.decay);
+  noise.connect(filter).connect(gain).connect(drumGainNodes[3]);
+  noise.start(time);
+  noise.stop(time + params.decay + 0.01);
+}
+
+function playDrumSound(trackIndex, time) {
+  ensureAudioContext();
+  const bank = DRUM_BANKS[currentDrumBank];
+  const vol = drumTrackVol[trackIndex] / 100;
+  const pitchMult = Math.pow(2, drumTrackPitch[trackIndex] / 12);
+  switch (trackIndex) {
+    case 0: synthKick(time, bank.kick, vol, pitchMult); break;
+    case 1: synthSnare(time, bank.snare, vol, pitchMult); break;
+    case 2: synthHiHat(time, bank.hihat, vol, pitchMult); break;
+    case 3: synthCymbal(time, bank.cymbal, vol, pitchMult); break;
+  }
+}
+
+// ============================================================
 // PAD HIGHLIGHT (visual only)
 // ============================================================
 
@@ -586,8 +881,8 @@ function setBpm(val) {
 }
 
 bpmInput.addEventListener("change", () => setBpm(bpmInput.value));
-bpmDec.addEventListener("click", () => setBpm(bpm - 1));
-bpmInc.addEventListener("click", () => setBpm(bpm + 1));
+bpmDecBtn.addEventListener("click", () => setBpm(bpm - 1));
+bpmIncBtn.addEventListener("click", () => setBpm(bpm + 1));
 
 // ============================================================
 // QUANTIZE TOGGLE
@@ -621,12 +916,12 @@ metroBtn.addEventListener("click", () => {
 
 // ============================================================
 // NOTE REPEAT — MPC-Style Auto-Retrigger
-// When active, held pads re-fire on every 1/32 step via the
-// scheduler.  Toggle via button or hold Shift for momentary.
+// Momentary via holding Shift key. Active only in Pad mode.
 // ============================================================
 
 function isNoteRepeatActive() {
-  return noteRepeatToggled || shiftHeld;
+  if (seqMode) return false;
+  return shiftHeld;
 }
 
 function getPressedPads() {
@@ -635,20 +930,36 @@ function getPressedPads() {
   return union;
 }
 
-noteRepeatBtn.addEventListener("click", () => {
-  noteRepeatToggled = !noteRepeatToggled;
-  noteRepeatBtn.classList.toggle("active", noteRepeatToggled);
-});
-
 // Clear all pressed pads when the window loses focus (prevent stuck repeats)
 window.addEventListener("blur", () => {
   mousePressedPads.clear();
   keyPressedPads.clear();
   shiftHeld = false;
-  if (!noteRepeatToggled) {
-    noteRepeatBtn.classList.remove("active");
-  }
 });
+
+// ============================================================
+// MODE SWITCH — Pad Grid ↔ Step Sequencer
+// ============================================================
+
+modeSwitch.addEventListener("click", () => {
+  ensureAudioContext();
+  seqMode = !seqMode;
+  modeSwitch.classList.toggle("seq-mode", seqMode);
+  padsSection.style.display = seqMode ? "none" : "";
+  stepSeqContainer.style.display = seqMode ? "" : "none";
+});
+
+// ============================================================
+// BANK SWITCHING — Cycle through drum banks A–D
+// ============================================================
+
+function setDrumBank(index) {
+  currentDrumBank = ((index % DRUM_BANKS.length) + DRUM_BANKS.length) % DRUM_BANKS.length;
+  bankValueEl.textContent = "BANK: " + BANK_NAMES[currentDrumBank];
+}
+
+bankDecBtn.addEventListener("click", () => setDrumBank(currentDrumBank - 1));
+bankIncBtn.addEventListener("click", () => setDrumBank(currentDrumBank + 1));
 
 // ============================================================
 // COUNT-IN ENGINE — 4-Beat Pre-Roll Before Recording
@@ -783,13 +1094,15 @@ function nextNote() {
   }
 }
 
-// ---- Schedule a note (audio + deferred visual + note repeat) ----
+// ---- Schedule a note (audio + deferred visual + note repeat + drum pattern) ----
 function scheduleNote(step, time) {
+  const stepsPerBar = THIRTYSECONDS_PER_BEAT * BEATS_PER_BAR;
+  const barStep = step % stepsPerBar;
+
   // Every quarter-note beat (every 8 thirty-seconds)
   if (step % THIRTYSECONDS_PER_BEAT === 0) {
     if (metronomeEnabled) {
       // Determine if this is the first beat of a bar (downbeat = 2400 Hz)
-      const stepsPerBar = THIRTYSECONDS_PER_BEAT * BEATS_PER_BAR;
       const isDownbeat = (step % stepsPerBar === 0);
       playMetronomeTick(time, isDownbeat);
 
@@ -797,6 +1110,19 @@ function scheduleNote(step, time) {
       const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
       setTimeout(() => flashMetronome(), delay);
     }
+  }
+
+  // ---- Drum Pattern: trigger TR steps at 16th-note boundaries ----
+  if (barStep % STEPS_PER_SIXTEENTH === 0) {
+    const sixteenthInBar = barStep / STEPS_PER_SIXTEENTH;
+    for (let tr = 0; tr < DRUM_TRACKS; tr++) {
+      if (drumPattern[tr][sixteenthInBar]) {
+        playDrumSound(tr, time);
+      }
+    }
+    // Defer playhead visual update to match audio timing
+    const phDelay = Math.max(0, (time - audioCtx.currentTime) * 1000);
+    setTimeout(() => updateSeqPlayhead(sixteenthInBar), phDelay);
   }
 
   // Play the sequenced slice if one exists at this step
@@ -880,6 +1206,7 @@ function stopPlayback() {
   stopCurrent();
   stopVisualLoop();
   progressFill.style.width = "0%";
+  clearSeqPlayhead();
 }
 
 // ---- Toggle recording (with 4-beat count-in pre-roll) ----
@@ -953,7 +1280,7 @@ stopBtn.addEventListener("click", () => stopPlayback());
 clearBtn.addEventListener("click", () => clearSequence());
 
 // ============================================================
-// VISUAL UPDATES (progress bar, metronome LED)
+// VISUAL UPDATES (progress bar, metronome LED, seq playhead)
 // ============================================================
 
 // ---- Start the requestAnimationFrame loop ----
@@ -1010,10 +1337,29 @@ function renderEventMarkers() {
   }
 }
 
+// ---- Update step sequencer running playhead (column highlight) ----
+function updateSeqPlayhead(stepIdx) {
+  for (let tr = 0; tr < seqStepElements.length; tr++) {
+    for (let s = 0; s < seqStepElements[tr].length; s++) {
+      seqStepElements[tr][s].classList.toggle("current", s === stepIdx);
+    }
+  }
+}
+
+// ---- Clear step sequencer playhead ----
+function clearSeqPlayhead() {
+  for (let tr = 0; tr < seqStepElements.length; tr++) {
+    for (let s = 0; s < seqStepElements[tr].length; s++) {
+      seqStepElements[tr][s].classList.remove("current");
+    }
+  }
+}
+
 // ============================================================
 // KEYBOARD SHORTCUTS
-// Shift = momentary Note Repeat.  Pad keys tracked for
-// press/release so Note Repeat knows which pads are held.
+// Shift = momentary Note Repeat (pad mode only).
+// Pad keys tracked for press/release so Note Repeat knows
+// which pads are held.
 // ============================================================
 
 // Pad mapping: 1234 / QWER / ASDF / ZXCV → pads 1-16
@@ -1031,7 +1377,6 @@ document.addEventListener("keydown", (e) => {
   // Shift key = momentary Note Repeat (activate on press)
   if (e.key === "Shift" && !e.repeat) {
     shiftHeld = true;
-    noteRepeatBtn.classList.add("active");
     return;
   }
 
@@ -1064,9 +1409,6 @@ document.addEventListener("keyup", (e) => {
   // Shift release = deactivate momentary Note Repeat
   if (e.key === "Shift") {
     shiftHeld = false;
-    if (!noteRepeatToggled) {
-      noteRepeatBtn.classList.remove("active");
-    }
     return;
   }
 

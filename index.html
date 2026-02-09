@@ -83,6 +83,12 @@
             <span id="bump-value">BUMP: -24 dB</span>
             <button id="bump-inc" class="lcd-btn" title="More compression">+</button>
           </div>
+          <span class="lcd-divider">|</span>
+          <div class="lcd-control-group">
+            <button id="bank-dec" class="lcd-btn" title="Previous drum bank">&lt;</button>
+            <span id="bank-value">BANK: A</span>
+            <button id="bank-inc" class="lcd-btn" title="Next drum bank">&gt;</button>
+          </div>
         </div>
 
         <!-- LCD footer info line -->
@@ -120,9 +126,13 @@
             <input type="range" id="swing-slider" min="50" max="75" value="50" step="1" />
             <span id="swing-value">50%</span>
           </div>
-          <div class="transport-group" id="note-repeat-group">
-            <button id="note-repeat-btn" title="Note Repeat: auto-retrigger held pads on 1/32 grid (hold Shift = momentary)">NR</button>
-            <span class="transport-label">REPEAT</span>
+          <!-- Mode toggle: PAD grid ↔ TR-style Step Sequencer -->
+          <div class="transport-group" id="mode-switch-group">
+            <span class="transport-label">PAD</span>
+            <div id="mode-switch" title="Toggle between Pad Grid and Step Sequencer">
+              <div class="mode-switch-lever"></div>
+            </div>
+            <span class="transport-label">SEQ</span>
           </div>
         </div>
 
@@ -141,6 +151,11 @@
         <div id="pad-grid">
           <!-- Pads 1-16 will be injected by JS -->
         </div>
+      </section>
+
+      <!-- Step Sequencer: 4-track TR-style drum machine (hidden by default) -->
+      <section id="step-sequencer" style="display: none;">
+        <!-- Tracks are built dynamically by JS -->
       </section>
 
     </div>
