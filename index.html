@@ -68,6 +68,23 @@
           </div>
         </div>
 
+        <!-- Digital controls row inside the LCD (beneath the waveform) -->
+        <div id="lcd-controls">
+          <button id="load-btn" class="lcd-btn" title="Load an audio file">[ LOAD ]</button>
+          <span class="lcd-divider">|</span>
+          <div class="lcd-control-group">
+            <button id="pitch-dec" class="lcd-btn" title="Pitch down">-</button>
+            <span id="pitch-value">PITCH: 0 ST</span>
+            <button id="pitch-inc" class="lcd-btn" title="Pitch up">+</button>
+          </div>
+          <span class="lcd-divider">|</span>
+          <div class="lcd-control-group">
+            <button id="bump-dec" class="lcd-btn" title="Less compression">-</button>
+            <span id="bump-value">BUMP: -24 dB</span>
+            <button id="bump-inc" class="lcd-btn" title="More compression">+</button>
+          </div>
+        </div>
+
         <!-- LCD footer info line -->
         <div id="lcd-info">
           <span id="file-name">NO FILE LOADED</span>
@@ -75,6 +92,9 @@
         </div>
 
       </section>
+
+      <!-- Hidden file input (used by the digital LOAD button) -->
+      <input type="file" id="file-input" accept="audio/*" hidden />
 
       <!-- Transport Controls: BPM, Metronome, Quantize, Swing, Rec/Play/Stop -->
       <section id="transport-section">
@@ -120,52 +140,6 @@
           <button id="clear-btn" title="Clear sequence">CLR</button>
         </div>
 
-      </section>
-
-      <!-- Load Sample + Pitch + Bump row -->
-      <section id="controls-row">
-        <!-- Load Sample button -->
-        <div class="control-block" id="load-block">
-          <label>SAMPLE</label>
-          <button id="load-btn" title="Load an audio file">LOAD</button>
-          <input type="file" id="file-input" accept="audio/*" hidden />
-        </div>
-
-        <!-- Global Pitch / Transpose control -->
-        <div class="control-block" id="pitch-block">
-          <label for="pitch-slider">PITCH</label>
-          <div id="pitch-control">
-            <span class="pitch-label">-12</span>
-            <input
-              type="range"
-              id="pitch-slider"
-              min="-12"
-              max="12"
-              value="0"
-              step="1"
-            />
-            <span class="pitch-label">+12</span>
-          </div>
-          <div id="pitch-value">0 ST</div>
-        </div>
-
-        <!-- Divider between pitch and bump -->
-        <div class="controls-divider"></div>
-
-        <!-- Master Compressor "BUMP" control -->
-        <div class="control-block" id="bump-block">
-          <label for="bump-slider">BUMP</label>
-          <input
-            type="range"
-            id="bump-slider"
-            min="0"
-            max="60"
-            value="24"
-            step="1"
-            title="Master compressor threshold (0 = off, 60 = max squeeze)"
-          />
-          <div id="bump-value">-24 dB</div>
-        </div>
       </section>
 
       <!-- Bottom Section: 4x4 Pad Grid -->

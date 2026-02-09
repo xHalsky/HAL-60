@@ -962,198 +962,83 @@ body {
 }
 
 /* ========================================================
-   CONTROLS ROW — Load Sample + Pitch on the chassis
+   LCD DIGITAL CONTROLS — Load, Pitch, Bump
+   Pixel-green interactive elements inside the dot-matrix
+   screen, directly beneath the waveform display.
    ======================================================== */
 
-/* Row containing Load and Pitch controls */
-#controls-row {
+/* Horizontal row of digital controls inside the LCD */
+#lcd-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 10px 16px;
-  margin: 8px 16px 0;
-  background: #b8b8b0;
-  border-radius: 4px;
-  border: 1px solid #a0a098;
-  box-shadow:
-    inset 0 1px 3px rgba(0, 0, 0, 0.15),
-    0 1px 0 #d8d8d0;
-}
-
-/* Individual control block */
-.control-block {
-  display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 8px;
+  padding: 5px 10px;
+  border-top: 1px solid #0a160a;
+  background: #0f1f0f;
+  position: relative;
+  z-index: 1;
 }
 
-/* Labels on the chassis (silk-screened text) */
-.control-block label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #444444;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-/* Load Sample button – hardware button style */
-#load-btn {
-  background: #e6e6dc;
-  color: #444444;
-  border: 1px solid #888880;
-  border-radius: 4px;
-  padding: 6px 16px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background 0.1s, box-shadow 0.1s, transform 0.06s;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow:
-    0 2px 0 #999990,
-    0 3px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Pressed load button */
-#load-btn:active {
-  box-shadow: 0 0px 0 #999990;
-  transform: translateY(2px);
-}
-
-#load-btn:hover {
-  background: #ddd8d0;
-}
-
-/* Pitch slider wrapper */
-#pitch-control {
-  flex: 1;
+/* Grouping wrapper for related digital controls (e.g. -/value/+) */
+.lcd-control-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
-/* Pitch endpoint labels (-12, +12) */
-.pitch-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #555555;
-  min-width: 24px;
-  text-align: center;
-}
-
-/* Pitch range slider – hardware knob track */
-#pitch-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
+/* Digital button inside the LCD screen — pixel-green framed style */
+.lcd-btn {
+  background: transparent;
+  color: #33ff33;
+  border: 1px solid #33ff33;
   border-radius: 2px;
-  background: #888880;
-  outline: none;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Pitch slider knob (physical gray knob with indicator) */
-#pitch-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
-  cursor: pointer;
-  border: 2px solid #555555;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
-}
-
-#pitch-slider::-webkit-slider-thumb:hover {
-  border-color: #444444;
-}
-
-#pitch-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
-  cursor: pointer;
-  border: 2px solid #555555;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Pitch readout value */
-#pitch-value {
+  padding: 2px 8px;
   font-family: "Courier New", Courier, monospace;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #444444;
-  min-width: 42px;
-  text-align: center;
-}
-
-/* Vertical divider between control groups */
-.controls-divider {
-  width: 1px;
-  height: 24px;
-  background: #999990;
-  flex-shrink: 0;
-}
-
-/* ---- BUMP Knob — Master Compressor Threshold ---- */
-
-/* Bump range slider track */
-#bump-slider {
-  width: 80px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #888880;
-  outline: none;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Bump slider knob — accented with deep red to match HAL-60 branding */
-#bump-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #cc4444, #880000);
   cursor: pointer;
-  border: 2px solid #551111;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.35),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
+  transition: background 0.06s, color 0.06s;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
-#bump-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #cc4444, #880000);
-  cursor: pointer;
-  border: 2px solid #551111;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.35),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+/* Pressed / active state — inverted colors for hardware-style selection */
+.lcd-btn:active {
+  background: #33ff33;
+  color: #1a2b1a;
+  text-shadow: none;
 }
 
-/* Bump readout value */
+/* Hover state for LCD buttons */
+.lcd-btn:hover {
+  background: rgba(51, 255, 51, 0.1);
+}
+
+/* Digital value readout inside the LCD */
+#pitch-value,
 #bump-value {
   font-family: "Courier New", Courier, monospace;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: #880000;
-  min-width: 48px;
-  text-align: center;
+  color: #33ff33;
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
+  letter-spacing: 1px;
   white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Thin pipe divider between LCD control groups */
+.lcd-divider {
+  color: #33ff33;
+  opacity: 0.25;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  user-select: none;
 }
 
 /* ========================================================
@@ -1295,11 +1180,6 @@ body {
     flex: 1;
     padding: 6px 4px;
     font-size: 0.65rem;
-  }
-
-  #controls-row {
-    flex-wrap: wrap;
-    gap: 10px;
   }
 
   #brand-name {

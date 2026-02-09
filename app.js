@@ -55,12 +55,14 @@ const dropZone = document.getElementById("drop-zone");
 // LCD BPM display
 const lcdBpmDisplay = document.getElementById("lcd-bpm-display");
 
-// Pitch
-const pitchSlider = document.getElementById("pitch-slider");
+// Pitch (digital +/- inside LCD)
+const pitchDec = document.getElementById("pitch-dec");
+const pitchInc = document.getElementById("pitch-inc");
 const pitchValueEl = document.getElementById("pitch-value");
 
-// Bump (master compressor)
-const bumpSlider = document.getElementById("bump-slider");
+// Bump / master compressor (digital +/- inside LCD)
+const bumpDec = document.getElementById("bump-dec");
+const bumpInc = document.getElementById("bump-inc");
 const bumpValueEl = document.getElementById("bump-value");
 
 // Pad grid container
@@ -534,36 +536,42 @@ function triggerPad(index) {
 }
 
 // ============================================================
-// PITCH SLIDER
+// PITCH — Digital +/- Buttons (inside LCD)
+// Range: -12 to +12 semitones, step 1
 // ============================================================
 
-pitchSlider.addEventListener("input", () => {
-  semitones = parseInt(pitchSlider.value, 10);
+function updatePitch(newVal) {
+  semitones = Math.max(-12, Math.min(12, newVal));
   const sign = semitones > 0 ? "+" : "";
-  pitchValueEl.textContent = `${sign}${semitones} ST`;
+  pitchValueEl.textContent = `PITCH: ${sign}${semitones} ST`;
 
   if (currentSource) {
     try {
       currentSource.playbackRate.value = Math.pow(2, semitones / 12);
     } catch (_) {}
   }
-});
+}
+
+pitchDec.addEventListener("click", () => updatePitch(semitones - 1));
+pitchInc.addEventListener("click", () => updatePitch(semitones + 1));
 
 // ============================================================
-// BUMP SLIDER — Master Compressor Threshold
-// Controls how hard the DynamicsCompressorNode "squashes" the
-// output.  0 = no compression (threshold 0 dB),
-// 60 = maximum squeeze (threshold -60 dB).
+// BUMP — Digital +/- Buttons (inside LCD)
+// Controls the DynamicsCompressorNode threshold.
+// Range: 0 (off) to 60 (max squeeze), step 3 dB.
 // ============================================================
 
-bumpSlider.addEventListener("input", () => {
-  bumpAmount = parseInt(bumpSlider.value, 10);
-  bumpValueEl.textContent = bumpAmount === 0 ? "OFF" : `-${bumpAmount} dB`;
+function updateBump(newVal) {
+  bumpAmount = Math.max(0, Math.min(60, newVal));
+  bumpValueEl.textContent = bumpAmount === 0 ? "BUMP: OFF" : `BUMP: -${bumpAmount} dB`;
 
   if (compressorNode) {
     compressorNode.threshold.setValueAtTime(-bumpAmount, audioCtx.currentTime);
   }
-});
+}
+
+bumpDec.addEventListener("click", () => updateBump(bumpAmount - 3));
+bumpInc.addEventListener("click", () => updateBump(bumpAmount + 3));
 
 // ============================================================
 // BPM CONTROLS
