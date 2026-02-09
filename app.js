@@ -1074,17 +1074,20 @@ function scheduleNote(step, time) {
     }
   }
 
-  // ---- Drum Pattern: trigger TR steps at 16th-note boundaries ----
-  if (barStep % STEPS_PER_SIXTEENTH === 0) {
-    const sixteenthInBar = barStep / STEPS_PER_SIXTEENTH;
+  // ---- Drum Pattern: trigger TR steps at quantize-resolution boundaries ----
+  // 1/16 mode → fire every 2 internal steps (16 steps = 1 bar)
+  // 1/32 mode → fire every internal step (16 steps = 2 beats)
+  const drumStepInterval = (quantizeRes === 32) ? 1 : STEPS_PER_SIXTEENTH;
+  if (barStep % drumStepInterval === 0) {
+    const drumStepIndex = Math.floor(barStep / drumStepInterval) % SEQ_STEPS;
     for (let tr = 0; tr < DRUM_TRACKS; tr++) {
-      if (drumPattern[tr][sixteenthInBar]) {
+      if (drumPattern[tr][drumStepIndex]) {
         playDrumSound(tr, time);
       }
     }
     // Defer playhead visual update to match audio timing
     const phDelay = Math.max(0, (time - audioCtx.currentTime) * 1000);
-    setTimeout(() => updateSeqPlayhead(sixteenthInBar), phDelay);
+    setTimeout(() => updateSeqPlayhead(drumStepIndex), phDelay);
   }
 
   // Play the sequenced slice if one exists at this step
