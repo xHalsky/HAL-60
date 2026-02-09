@@ -888,6 +888,66 @@ body {
   text-align: center;
 }
 
+/* Vertical divider between control groups */
+.controls-divider {
+  width: 1px;
+  height: 24px;
+  background: #999990;
+  flex-shrink: 0;
+}
+
+/* ---- BUMP Knob — Master Compressor Threshold ---- */
+
+/* Bump range slider track */
+#bump-slider {
+  width: 80px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #888880;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Bump slider knob — accented with deep red to match HAL-60 branding */
+#bump-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #cc4444, #880000);
+  cursor: pointer;
+  border: 2px solid #551111;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+}
+
+#bump-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #cc4444, #880000);
+  cursor: pointer;
+  border: 2px solid #551111;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* Bump readout value */
+#bump-value {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #880000;
+  min-width: 48px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 /* ========================================================
    PAD GRID SECTION
    4x4 grid of rubberized pads. Stone gray (#8e8e88) with

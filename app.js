@@ -59,6 +59,10 @@ const lcdBpmDisplay = document.getElementById("lcd-bpm-display");
 const pitchSlider = document.getElementById("pitch-slider");
 const pitchValueEl = document.getElementById("pitch-value");
 
+// Bump (master compressor)
+const bumpSlider = document.getElementById("bump-slider");
+const bumpValueEl = document.getElementById("bump-value");
+
 // Pad grid container
 const padGrid = document.getElementById("pad-grid");
 
@@ -90,6 +94,11 @@ let currentSource = null;
 let currentGain = null;
 let activePadIndex = -1;
 let semitones = 0;
+
+// Master output chain: MasterGainNode → DynamicsCompressorNode → destination
+let masterGainNode = null;
+let compressorNode = null;
+let bumpAmount = 24; // Compressor threshold = -(bumpAmount) dB; 0 = off, 60 = max
 
 // Wavesurfer
 let wavesurfer = null;
@@ -353,6 +362,22 @@ function enablePads() {
 function ensureAudioContext() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // ---- Build Master Output Chain ----
+    // All slice outputs → masterGainNode → compressorNode → destination
+    // The compressor acts as a limiter / "glue" to give the 90s boom-bap punch.
+    masterGainNode = audioCtx.createGain();
+    masterGainNode.gain.value = 1.0;
+
+    compressorNode = audioCtx.createDynamicsCompressor();
+    compressorNode.threshold.value = -bumpAmount;  // -24 dB default
+    compressorNode.knee.value = 30;                 // Soft knee for musical feel
+    compressorNode.ratio.value = 12;                // Aggressive squash for punch
+    compressorNode.attack.value = 0.003;            // Fast; lets the click through
+    compressorNode.release.value = 0.25;            // Slow pump for boom-bap groove
+
+    masterGainNode.connect(compressorNode);
+    compressorNode.connect(audioCtx.destination);
   }
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -385,7 +410,7 @@ function playSlice(index, atTime) {
   const gainNode = audioCtx.createGain();
   gainNode.gain.setValueAtTime(1, t);
 
-  source.connect(gainNode).connect(audioCtx.destination);
+  source.connect(gainNode).connect(masterGainNode);
   source.playbackRate.value = Math.pow(2, semitones / 12);
 
   const offset = slice.start;
@@ -473,6 +498,22 @@ pitchSlider.addEventListener("input", () => {
     try {
       currentSource.playbackRate.value = Math.pow(2, semitones / 12);
     } catch (_) {}
+  }
+});
+
+// ============================================================
+// BUMP SLIDER — Master Compressor Threshold
+// Controls how hard the DynamicsCompressorNode "squashes" the
+// output.  0 = no compression (threshold 0 dB),
+// 60 = maximum squeeze (threshold -60 dB).
+// ============================================================
+
+bumpSlider.addEventListener("input", () => {
+  bumpAmount = parseInt(bumpSlider.value, 10);
+  bumpValueEl.textContent = bumpAmount === 0 ? "OFF" : `-${bumpAmount} dB`;
+
+  if (compressorNode) {
+    compressorNode.threshold.setValueAtTime(-bumpAmount, audioCtx.currentTime);
   }
 });
 

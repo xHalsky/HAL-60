@@ -109,7 +109,7 @@
 
       </section>
 
-      <!-- Load Sample + Pitch row -->
+      <!-- Load Sample + Pitch + Bump row -->
       <section id="controls-row">
         <!-- Load Sample button -->
         <div class="control-block" id="load-block">
@@ -134,6 +134,24 @@
             <span class="pitch-label">+12</span>
           </div>
           <div id="pitch-value">0 ST</div>
+        </div>
+
+        <!-- Divider between pitch and bump -->
+        <div class="controls-divider"></div>
+
+        <!-- Master Compressor "BUMP" control -->
+        <div class="control-block" id="bump-block">
+          <label for="bump-slider">BUMP</label>
+          <input
+            type="range"
+            id="bump-slider"
+            min="0"
+            max="60"
+            value="24"
+            step="1"
+            title="Master compressor threshold (0 = off, 60 = max squeeze)"
+          />
+          <div id="bump-value">-24 dB</div>
         </div>
       </section>
 
