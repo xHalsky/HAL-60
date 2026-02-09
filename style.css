@@ -187,11 +187,31 @@ body {
   border: 3px solid #333333;
   box-shadow:
     inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 40px rgba(51, 255, 51, 0.03),
     0 1px 0 #d8d8d0;
   overflow: hidden;
 }
 
-/* Scanline overlay for CRT / dot-matrix effect */
+/* LCD Pixel Grid Overlay — dot-matrix texture via ::after pseudo-element.
+   Repeating radial-gradient creates tiny black dots at 3px intervals,
+   simulating the physical pixel mesh of an 80s display. */
+#lcd-screen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle, #000000 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Scanline overlay — horizontal lines every 2px simulating CRT raster.
+   Subtle flicker animation simulates vintage power-supply fluctuations. */
 #lcd-scanlines {
   position: absolute;
   top: 0;
@@ -202,11 +222,18 @@ body {
     0deg,
     transparent 0px,
     transparent 2px,
-    rgba(0, 0, 0, 0.15) 2px,
-    rgba(0, 0, 0, 0.15) 4px
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
   );
   pointer-events: none;
   z-index: 10;
+  animation: lcd-flicker 0.08s linear infinite;
+}
+
+/* CRT power-supply flicker — 1-2% brightness variation */
+@keyframes lcd-flicker {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.97; }
 }
 
 /* ---- Count-In Overlay ---- */
@@ -226,8 +253,9 @@ body {
   font-weight: 900;
   color: #33ff33;
   text-shadow:
-    0 0 30px rgba(51, 255, 51, 0.5),
-    0 0 60px rgba(51, 255, 51, 0.2);
+    0 0 12px rgba(51, 255, 51, 0.7),
+    0 0 30px rgba(51, 255, 51, 0.4),
+    0 0 60px rgba(51, 255, 51, 0.15);
   z-index: 5;
   background: rgba(26, 43, 26, 0.88);
   pointer-events: none;
@@ -251,6 +279,7 @@ body {
   opacity: 0.65;
   position: relative;
   z-index: 1;
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
 }
 
 /* ---- Loop Progress Bar (inside the LCD) ---- */
@@ -300,6 +329,7 @@ body {
   height: 100%;
   background: #33ff33;
   opacity: 0.5;
+  box-shadow: 0 0 4px rgba(51, 255, 51, 0.4);
 }
 
 /* Beat tick (every 8 thirty-seconds = 1 quarter note) – bold */
@@ -307,6 +337,7 @@ body {
   height: 55%;
   background: #33ff33;
   opacity: 0.25;
+  box-shadow: 0 0 2px rgba(51, 255, 51, 0.25);
 }
 
 /* 16th-note tick (every 2 thirty-seconds) – medium */
@@ -327,6 +358,7 @@ body {
 .progress-tick.tick-flash {
   background: #33ff33 !important;
   opacity: 1 !important;
+  box-shadow: 0 0 6px rgba(51, 255, 51, 0.8) !important;
 }
 
 /* Small dot markers showing recorded events on the bar */
@@ -339,7 +371,9 @@ body {
   background: #33ff33;
   pointer-events: none;
   transform: translateX(-50%);
-  box-shadow: 0 0 3px rgba(51, 255, 51, 0.6);
+  box-shadow:
+    0 0 3px rgba(51, 255, 51, 0.6),
+    0 0 8px rgba(51, 255, 51, 0.3);
 }
 
 /* ---- Waveform area inside the LCD ---- */
@@ -371,10 +405,11 @@ body {
   color: #33ff33;
   font-family: "Courier New", Courier, monospace;
   font-size: 0.85rem;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   user-select: none;
   pointer-events: none;
   opacity: 0.5;
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
 }
 
 #drop-zone-text small {
@@ -387,13 +422,14 @@ body {
   display: none;
 }
 
-/* Wavesurfer waveform container */
+/* Wavesurfer waveform container — phosphor glow simulates CRT bloom */
 #waveform {
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
+  filter: drop-shadow(0 0 3px rgba(51, 255, 51, 0.4));
 }
 
 /* ---- LCD footer info line ---- */
@@ -407,10 +443,11 @@ body {
   font-family: "Courier New", Courier, monospace;
   font-size: 0.7rem;
   color: #33ff33;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   border-top: 1px solid #0a160a;
   background: #0f1f0f;
   text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
 }
 
 /* Filename display in the LCD */
@@ -484,6 +521,8 @@ body {
   padding: 3px 2px;
   outline: none;
   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
+  letter-spacing: 1px;
 }
 
 #bpm-input:focus {
@@ -546,8 +585,9 @@ body {
 #metronome-led.flash {
   background: #33ff33;
   box-shadow:
-    0 0 6px rgba(51, 255, 51, 0.6),
-    0 0 12px rgba(51, 255, 51, 0.3);
+    0 0 6px rgba(51, 255, 51, 0.7),
+    0 0 14px rgba(51, 255, 51, 0.4),
+    0 0 24px rgba(51, 255, 51, 0.15);
 }
 
 /* ---- Quantize Toggle Button ---- */

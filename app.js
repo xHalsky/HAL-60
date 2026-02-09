@@ -238,8 +238,8 @@ function initWavesurfer() {
     cursorColor: "#66ff66",
     cursorWidth: 1,
     height: 160,
-    // Blocky bar style to simulate dot-matrix / low-res display
-    barWidth: 3,
+    // Blocky bar style to simulate dot-matrix / LED grid display
+    barWidth: 2,
     barGap: 1,
     barRadius: 0,
     normalize: true,
