@@ -599,19 +599,20 @@ body {
   gap: 14px;
 }
 
-/* Generic grouping inside transport */
+/* Generic grouping inside transport — uniform spacing between label and control */
 .transport-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* Labels inside transport groups — silk-screened on chassis */
 .transport-group label,
 .transport-label {
-  font-size: 0.65rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
   font-weight: 700;
-  color: #444444;
+  color: #4a4a4a;
   text-transform: uppercase;
   letter-spacing: 1px;
   white-space: nowrap;
@@ -636,6 +637,7 @@ body {
   text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
   letter-spacing: 1px;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Hide spinner arrows — Chrome, Safari, Edge */
@@ -698,8 +700,9 @@ body {
   border-right: 2px solid #999999;
   background: #e6e6dc;
   color: #666666;
-  font-size: 0.6rem;
-  font-weight: 800;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.06s;
   box-shadow:
@@ -824,13 +827,15 @@ body {
 
 /* Individual position label */
 .q-label {
-  font-size: 0.5rem;
-  font-weight: 700;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
   color: #555555;
   text-align: center;
   width: 18px;
   cursor: pointer;
   user-select: none;
+  letter-spacing: 0.5px;
 }
 
 /* Highlight the active label */
@@ -838,6 +843,7 @@ body {
 #quantize-switch[data-position="1"] .q-label[data-val="16"],
 #quantize-switch[data-position="2"] .q-label[data-val="32"] {
   color: #222222;
+  font-weight: 800;
 }
 
 /* ---- Swing 3-Position Toggle Switch ---- */
@@ -903,13 +909,15 @@ body {
 
 /* Individual position label */
 .swing-label {
-  font-size: 0.5rem;
-  font-weight: 700;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
   color: #555555;
   text-align: center;
   width: 18px;
   cursor: pointer;
   user-select: none;
+  letter-spacing: 0.5px;
 }
 
 /* Highlight the active label */
@@ -917,6 +925,7 @@ body {
 #swing-switch[data-position="1"] .swing-label[data-val="60"],
 #swing-switch[data-position="2"] .swing-label[data-val="70"] {
   color: #222222;
+  font-weight: 800;
 }
 
 /* ---- Row 2: Transport Buttons (Rec, Play, Stop, Clear) ---- */
@@ -1210,29 +1219,32 @@ body {
 .mode-labels {
   display: flex;
   justify-content: space-between;
-  width: 42px;
+  width: 56px;
 }
 
 /* Individual PAD / SEQ label */
 .mode-label {
-  font-size: 0.5rem;
-  font-weight: 700;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
   color: #555555;
   text-align: center;
-  width: 20px;
+  width: 26px;
   cursor: pointer;
   user-select: none;
+  letter-spacing: 0.5px;
 }
 
 /* Highlight the active label */
 #mode-switch[data-position="0"] .mode-label[data-val="pad"],
 #mode-switch[data-position="1"] .mode-label[data-val="seq"] {
   color: #222222;
+  font-weight: 800;
 }
 
-/* Recessed dark track for the sliding cap */
+/* Recessed dark track for the sliding cap — same dimensions as Q and SWING */
 .mode-track {
-  width: 42px;
+  width: 56px;
   height: 16px;
   background: #222222;
   border-radius: 4px;
@@ -1243,12 +1255,12 @@ body {
   border: 1px solid #1a1a1a;
 }
 
-/* Cream sliding cap — snaps between 2 positions */
+/* Cream sliding cap — same size as Q and SWING caps */
 .mode-cap {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 18px;
+  width: 16px;
   height: 10px;
   border-radius: 3px;
   background: linear-gradient(180deg, #f0f0e8 0%, #d8d8d0 50%, #e6e6dc 100%);
@@ -1266,7 +1278,7 @@ body {
 }
 
 #mode-switch[data-position="1"] .mode-cap {
-  left: 20px;
+  left: 38px;
 }
 
 /* ========================================================
