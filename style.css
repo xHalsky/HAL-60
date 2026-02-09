@@ -619,7 +619,7 @@ body {
 
 /* ---- BPM Group ---- */
 
-/* BPM numeric input (recessed into the chassis) */
+/* BPM numeric input (recessed into the chassis, spinners hidden) */
 #bpm-input {
   width: 48px;
   background: #1a2b1a;
@@ -630,11 +630,19 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
   text-align: center;
-  padding: 3px 2px;
+  padding: 5px 4px;
   outline: none;
   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
   text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
   letter-spacing: 1px;
+  -moz-appearance: textfield;
+}
+
+/* Hide spinner arrows — Chrome, Safari, Edge */
+#bpm-input::-webkit-outer-spin-button,
+#bpm-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 #bpm-input:focus {
