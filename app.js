@@ -4,6 +4,7 @@
 // Features: 16-pad sampler, mute-group, 8-bar loop recorder,
 //           quantize (1/32), MPC-style swing, visual metronome,
 //           MPC-style note repeat (Shift = momentary).
+// Visual: MPC 60 vintage aesthetic with dot-matrix LCD.
 // ============================================================
 
 import WaveSurfer from "https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js";
@@ -21,24 +22,24 @@ const SIXTEENTHS_PER_BEAT = 4;       // Used for swing grouping (16th-note level
 const STEPS_PER_SIXTEENTH = 2;       // Two 32nds make one 16th
 const TOTAL_STEPS = BARS * BEATS_PER_BAR * THIRTYSECONDS_PER_BEAT; // 256
 
-// Per-pad region colours (fill & border)
+// Per-pad region colours – pixel-green shades for the LCD display
 const PAD_COLORS = [
-  "rgba(255, 77, 77, 0.18)",
-  "rgba(255, 140, 50, 0.18)",
-  "rgba(255, 200, 40, 0.18)",
-  "rgba(100, 220, 60, 0.18)",
-  "rgba(60, 200, 180, 0.18)",
-  "rgba(50, 160, 255, 0.18)",
-  "rgba(100, 100, 255, 0.18)",
-  "rgba(160, 80, 255, 0.18)",
-  "rgba(220, 60, 220, 0.18)",
-  "rgba(255, 80, 150, 0.18)",
-  "rgba(255, 110, 90, 0.18)",
-  "rgba(200, 180, 50, 0.18)",
-  "rgba(60, 210, 120, 0.18)",
-  "rgba(60, 180, 240, 0.18)",
-  "rgba(130, 70, 255, 0.18)",
-  "rgba(240, 60, 180, 0.18)",
+  "rgba(51, 255, 51, 0.12)",
+  "rgba(51, 255, 51, 0.14)",
+  "rgba(51, 255, 51, 0.10)",
+  "rgba(51, 255, 51, 0.13)",
+  "rgba(51, 255, 51, 0.11)",
+  "rgba(51, 255, 51, 0.15)",
+  "rgba(51, 255, 51, 0.12)",
+  "rgba(51, 255, 51, 0.14)",
+  "rgba(51, 255, 51, 0.10)",
+  "rgba(51, 255, 51, 0.13)",
+  "rgba(51, 255, 51, 0.11)",
+  "rgba(51, 255, 51, 0.15)",
+  "rgba(51, 255, 51, 0.12)",
+  "rgba(51, 255, 51, 0.14)",
+  "rgba(51, 255, 51, 0.10)",
+  "rgba(51, 255, 51, 0.13)",
 ];
 
 // ============================================================
@@ -50,6 +51,9 @@ const loadBtn = document.getElementById("load-btn");
 const fileInput = document.getElementById("file-input");
 const fileNameEl = document.getElementById("file-name");
 const dropZone = document.getElementById("drop-zone");
+
+// LCD BPM display
+const lcdBpmDisplay = document.getElementById("lcd-bpm-display");
 
 // Pitch
 const pitchSlider = document.getElementById("pitch-slider");
@@ -198,6 +202,8 @@ buildProgressTicks();
 
 // ============================================================
 // WAVESURFER INITIALISATION
+// Configured for blocky "bar" style waveform to match the
+// dot-matrix LCD aesthetic of the MPC 60.
 // ============================================================
 
 function initWavesurfer() {
@@ -205,14 +211,16 @@ function initWavesurfer() {
 
   wavesurfer = WaveSurfer.create({
     container: "#waveform",
-    waveColor: "#4a4a6a",
-    progressColor: "#3a3aff",
-    cursorColor: "#ffffff",
+    // Pixel-green waveform on dark olive-green LCD background
+    waveColor: "#33ff33",
+    progressColor: "#22aa22",
+    cursorColor: "#66ff66",
     cursorWidth: 1,
-    height: 180,
-    barWidth: 2,
+    height: 160,
+    // Blocky bar style to simulate dot-matrix / low-res display
+    barWidth: 3,
     barGap: 1,
-    barRadius: 2,
+    barRadius: 0,
     normalize: true,
     interact: false,
     plugins: [wsRegions],
@@ -261,7 +269,7 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 function loadFile(file) {
-  fileNameEl.textContent = file.name;
+  fileNameEl.textContent = file.name.toUpperCase();
   dropZone.classList.add("loaded");
 
   // Stop sequencer and audio
@@ -459,7 +467,7 @@ function triggerPad(index) {
 pitchSlider.addEventListener("input", () => {
   semitones = parseInt(pitchSlider.value, 10);
   const sign = semitones > 0 ? "+" : "";
-  pitchValueEl.textContent = `${sign}${semitones} st`;
+  pitchValueEl.textContent = `${sign}${semitones} ST`;
 
   if (currentSource) {
     try {
@@ -476,6 +484,10 @@ function setBpm(val) {
   bpm = Math.max(60, Math.min(200, Number(val) || 120));
   bpmInput.value = bpm;
   bpmSlider.value = bpm;
+  // Update LCD BPM display
+  if (lcdBpmDisplay) {
+    lcdBpmDisplay.textContent = bpm + " BPM";
+  }
 }
 
 bpmInput.addEventListener("change", () => setBpm(bpmInput.value));

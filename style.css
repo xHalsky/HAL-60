@@ -1,6 +1,7 @@
 /* ======================================================
-   SlicePad – CSS Stylesheet
+   SlicePad – MPC 60 Vintage Aesthetic
    All colors use plain Hex or RGB. No CSS variables.
+   Inspired by the 1988 Akai MPC 60 hardware sampler.
    ====================================================== */
 
 /* ---------- Reset & Base ---------- */
@@ -15,39 +16,227 @@ html {
   font-size: 16px;
 }
 
+/* Body: dark workspace behind the machine */
 body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: #121218;
-  color: #e0e0e6;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #2a2a2a;
+  color: #333333;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 24px 16px 48px;
-}
-
-/* ---------- App Container ---------- */
-/* Centres the whole application and limits max width */
-#app {
-  width: 100%;
-  max-width: 900px;
+  align-items: flex-start;
+  padding: 32px 16px 48px;
 }
 
 /* ========================================================
-   LOOP PROGRESS BAR
-   Thin horizontal bar at the very top showing the
-   playhead position within the 8-bar loop, with 1/32nd
-   note grid tick marks (256 total across 8 bars).
+   CHASSIS — The outer hardware enclosure
+   Wraps the wood side panels and the main metal body.
    ======================================================== */
 
-/* Outer container for the progress bar */
+/* Outer chassis container with wood end-cheeks */
+#chassis {
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.5));
+}
+
+/* Wood end-cheek panels (left and right) */
+.wood-panel {
+  width: 28px;
+  flex-shrink: 0;
+  background: #5d3a1a;
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.06) 0px,
+      rgba(0, 0, 0, 0.06) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      175deg,
+      rgba(90, 55, 20, 0.3) 0px,
+      rgba(90, 55, 20, 0.3) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+}
+
+/* Left wood panel with rounded left corners */
+.wood-left {
+  border-radius: 10px 0 0 10px;
+}
+
+/* Right wood panel with rounded right corners */
+.wood-right {
+  border-radius: 0 10px 10px 0;
+}
+
+/* ========================================================
+   APP CONTAINER — The main metal chassis body
+   Uses warm vintage gray (#c8c8c1) as the base color.
+   ======================================================== */
+
+/* Main body of the machine (warm vintage gray metal) */
+#app {
+  flex: 1;
+  background: #c8c8c1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================================
+   HEADER — Brand nameplate, model info, and designer
+   signature printed / embossed on the metal chassis.
+   ======================================================== */
+
+/* Top branding bar on the metal chassis */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  background: #bfbfb8;
+  border-bottom: 2px solid #a8a8a0;
+}
+
+/* Left side: nameplate + model description */
+#header-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* HAL-60 / THE BUMPLER nameplate block */
+#brand-nameplate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+/* "HAL-60" — bold italic deep-red logo text */
+#brand-name {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 3px;
+  color: #880000;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+/* Thin manufactured-look divider between brand name and subtitle */
+#brand-divider {
+  width: 100%;
+  height: 1px;
+  background: #888880;
+  margin: 2px 0;
+}
+
+/* "THE BUMPLER" — smaller thin subtitle under the divider */
+#brand-subtitle {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 2.5px;
+  color: #333333;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* "SAMPLING PRODUCTION CENTER" descriptor next to nameplate */
+.model-desc {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #666666;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  max-width: 120px;
+  line-height: 1.3;
+}
+
+/* "Roger Linn" style designer signature in the top-right corner */
+#designer-signature {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  font-weight: 400;
+  color: #222222;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  user-select: none;
+}
+
+/* ========================================================
+   LCD DOT-MATRIX SCREEN
+   Dark olive-green background (#1a2b1a) with pixel-green
+   (#33ff33) text and waveform. Includes a scanline overlay
+   to simulate a vintage low-res display.
+   ======================================================== */
+
+/* The LCD screen container */
+#lcd-screen {
+  position: relative;
+  background: #1a2b1a;
+  margin: 12px 16px 0;
+  border-radius: 6px;
+  border: 3px solid #333333;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    0 1px 0 #d8d8d0;
+  overflow: hidden;
+}
+
+/* Scanline overlay for CRT / dot-matrix effect */
+#lcd-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ---- LCD Splash / Digital Branding Line ---- */
+
+/* Center-aligned digital branding text at the top of the LCD */
+#lcd-splash {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #33ff33;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 10px 3px;
+  background: #0f1f0f;
+  border-bottom: 1px solid #0a160a;
+  opacity: 0.65;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Loop Progress Bar (inside the LCD) ---- */
+
+/* Outer container for the progress bar inside the LCD */
 #loop-progress {
-  height: 22px;
-  background: #16161e;
-  border: 1px solid #2a2a38;
-  border-radius: 10px 10px 0 0;
+  height: 20px;
+  background: #0f1f0f;
   position: relative;
   overflow: hidden;
-  margin-bottom: 0;
+  border-bottom: 1px solid #0a160a;
 }
 
 /* Moving fill that represents current loop position */
@@ -57,7 +246,7 @@ body {
   left: 0;
   width: 0%;
   height: 100%;
-  background: rgba(58, 58, 255, 0.25);
+  background: rgba(51, 255, 51, 0.12);
   pointer-events: none;
   will-change: width;
 }
@@ -84,34 +273,34 @@ body {
 /* Bar-line tick (every 32 thirty-seconds = 1 bar boundary) – boldest */
 .progress-tick.bar-tick {
   height: 100%;
-  background: #888888;
-  opacity: 0.6;
+  background: #33ff33;
+  opacity: 0.5;
 }
 
 /* Beat tick (every 8 thirty-seconds = 1 quarter note) – bold */
 .progress-tick.beat-tick {
   height: 55%;
-  background: #888888;
-  opacity: 0.35;
+  background: #33ff33;
+  opacity: 0.25;
 }
 
 /* 16th-note tick (every 2 thirty-seconds) – medium */
 .progress-tick.sixteenth-tick {
   height: 34%;
-  background: #666666;
-  opacity: 0.3;
+  background: #22aa22;
+  opacity: 0.2;
 }
 
 /* 32nd-note micro-tick (every odd step) – lightest */
 .progress-tick.thirtysecond-tick {
   height: 18%;
-  background: #444444;
-  opacity: 0.25;
+  background: #116611;
+  opacity: 0.2;
 }
 
 /* Blip / flash effect when a note is placed on a grid line */
 .progress-tick.tick-flash {
-  background: #3aff6a !important;
+  background: #33ff33 !important;
   opacity: 1 !important;
 }
 
@@ -122,396 +311,50 @@ body {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #ff6a3a;
+  background: #33ff33;
   pointer-events: none;
   transform: translateX(-50%);
+  box-shadow: 0 0 3px rgba(51, 255, 51, 0.6);
 }
 
-/* ---------- Header ---------- */
-/* Top branding bar */
-#header {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  padding: 14px 16px 10px;
-  background: #16161e;
-  border-left: 1px solid #2a2a38;
-  border-right: 1px solid #2a2a38;
-}
+/* ---- Waveform area inside the LCD ---- */
 
-#header h1 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #ffffff;
-}
-
-#header .subtitle {
-  font-size: 0.82rem;
-  color: #777790;
-  letter-spacing: 0.5px;
-}
-
-/* ========================================================
-   TRANSPORT SECTION
-   Horizontal toolbar housing BPM, metronome LED,
-   quantize toggle, swing slider, and transport buttons.
-   ======================================================== */
-
-/* The transport row */
-#transport-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  background: #1a1a24;
-  border: 1px solid #2a2a38;
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-
-/* Generic grouping inside transport */
-.transport-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Labels inside transport groups */
-.transport-group label,
-.transport-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #7a7a94;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-/* ---- BPM Group ---- */
-
-/* BPM numeric input */
-#bpm-input {
-  width: 52px;
-  background: #24243a;
-  border: 1px solid #3a3a50;
-  border-radius: 5px;
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-align: center;
-  padding: 4px 2px;
-  outline: none;
-}
-
-#bpm-input:focus {
-  border-color: #3a3aff;
-}
-
-/* BPM range slider */
-#bpm-slider {
-  width: 80px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 5px;
-  border-radius: 3px;
-  background: #2e2e40;
-  outline: none;
-}
-
-#bpm-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #3a3aff;
-  cursor: pointer;
-  border: 2px solid #1a1a24;
-}
-
-#bpm-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #3a3aff;
-  cursor: pointer;
-  border: 2px solid #1a1a24;
-}
-
-/* ---- Visual Metronome LED ---- */
-/* Small circle that flashes on every beat */
-#metronome-led {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #2a2a38;
-  border: 1px solid #3a3a50;
-  flex-shrink: 0;
-  transition: background 0.06s, box-shadow 0.06s;
-}
-
-/* Flash state applied on each quarter-note beat */
-#metronome-led.flash {
-  background: #3aff6a;
-  box-shadow: 0 0 8px rgba(58, 255, 106, 0.6);
-}
-
-/* ---- Quantize Toggle Button ---- */
-/* Small square button labeled "Q" to toggle quantize */
-#quantize-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
-  border: 1px solid #3a3a50;
-  background: #24243a;
-  color: #6a6a80;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
-}
-
-/* Active (quantize ON) state */
-#quantize-btn.active {
-  background: #3a3aff;
-  color: #ffffff;
-  border-color: #5c5cff;
-}
-
-#quantize-btn:hover {
-  border-color: #5a5a78;
-}
-
-/* ---- Note Repeat Button ---- */
-/* Prominent toggle that lights up red when Note Repeat is active.
-   When on, held pads auto-retrigger at the current grid rate. */
-#note-repeat-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
-  border: 1px solid #3a3a50;
-  background: #24243a;
-  color: #6a6a80;
-  font-size: 0.7rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s, box-shadow 0.12s;
-}
-
-/* Active state – lights up red (#FF0000) */
-#note-repeat-btn.active {
-  background: #FF0000;
-  color: #ffffff;
-  border-color: #FF4444;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-}
-
-#note-repeat-btn:hover {
-  border-color: #5a5a78;
-}
-
-/* ---- Swing Group ---- */
-
-/* Swing range slider */
-#swing-slider {
-  width: 70px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 5px;
-  border-radius: 3px;
-  background: #2e2e40;
-  outline: none;
-}
-
-#swing-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #d9a640;
-  cursor: pointer;
-  border: 2px solid #1a1a24;
-}
-
-#swing-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #d9a640;
-  cursor: pointer;
-  border: 2px solid #1a1a24;
-}
-
-/* Swing readout value */
-#swing-value {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #d9a640;
-  min-width: 32px;
-  text-align: center;
-}
-
-/* ---- Transport Buttons (Rec, Play, Stop, Clear) ---- */
-/* Row of transport action buttons */
-#transport-buttons {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
-}
-
-/* Shared base style for transport buttons */
-#transport-buttons button {
-  border: none;
-  border-radius: 6px;
-  padding: 7px 14px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
-  white-space: nowrap;
-}
-
-/* Record button – default (inactive) */
-#rec-btn {
-  background: #3a2020;
-  color: #cc5050;
-}
-
-#rec-btn:hover {
-  background: #4a2828;
-}
-
-/* Record button – active (recording) */
-#rec-btn.active {
-  background: #ff3a3a;
-  color: #ffffff;
-  animation: rec-pulse 1s ease-in-out infinite;
-}
-
-/* Pulsing glow for active record */
-@keyframes rec-pulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(255, 58, 58, 0.4); }
-  50%      { box-shadow: 0 0 14px rgba(255, 58, 58, 0.7); }
-}
-
-/* Play button – default (inactive) */
-#play-btn {
-  background: #203a24;
-  color: #50cc60;
-}
-
-#play-btn:hover {
-  background: #284a30;
-}
-
-/* Play button – active (playing) */
-#play-btn.active {
-  background: #30d050;
-  color: #0e1a10;
-}
-
-/* Stop button */
-#stop-btn {
-  background: #24243a;
-  color: #9090a8;
-}
-
-#stop-btn:hover {
-  background: #30304a;
-}
-
-/* Clear button */
-#clear-btn {
-  background: #24243a;
-  color: #9090a8;
-}
-
-#clear-btn:hover {
-  background: #30304a;
-  color: #d0d0e0;
-}
-
-/* ---------- Waveform Section ---------- */
-/* Container for toolbar + waveform viewer */
-#waveform-section {
-  background: #1a1a24;
-  border: 1px solid #2a2a38;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 18px;
-}
-
-/* Toolbar row above waveform */
-#waveform-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  background: #16161e;
-  border-bottom: 1px solid #2a2a38;
-}
-
-/* Load Sample button */
-#load-btn {
-  background: #3a3aff;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-
-#load-btn:hover {
-  background: #5252ff;
-}
-
-#load-btn .icon {
-  font-size: 0.7rem;
-}
-
-/* Filename display */
-#file-name {
-  font-size: 0.8rem;
-  color: #6a6a80;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Waveform display area within the LCD screen */
+#waveform-area {
+  position: relative;
+  min-height: 160px;
 }
 
 /* Drop zone / waveform area */
 #drop-zone {
   position: relative;
-  min-height: 180px;
+  min-height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
 }
 
+/* Drag-over highlight on the LCD drop zone */
 #drop-zone.drag-over {
-  background: rgba(58, 58, 255, 0.08);
+  background: rgba(51, 255, 51, 0.05);
 }
 
-/* Placeholder text when no file loaded */
+/* Placeholder text when no file loaded (LCD pixel-green style) */
 #drop-zone-text {
   text-align: center;
-  color: #4a4a5e;
-  font-size: 0.9rem;
+  color: #33ff33;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
   user-select: none;
   pointer-events: none;
+  opacity: 0.5;
 }
 
 #drop-zone-text small {
-  font-size: 0.75rem;
-  color: #3a3a50;
+  font-size: 0.7rem;
+  color: #22aa22;
 }
 
 /* Hide placeholder once waveform is active */
@@ -528,198 +371,654 @@ body {
   height: 100%;
 }
 
-/* ---------- Pitch Section ---------- */
-/* Global pitch / transpose slider row */
-#pitch-section {
-  background: #1a1a24;
-  border: 1px solid #2a2a38;
-  border-radius: 10px;
-  padding: 14px 20px;
-  margin-bottom: 18px;
+/* ---- LCD footer info line ---- */
+
+/* Info line at the bottom of the LCD screen */
+#lcd-info {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  padding: 4px 10px 6px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.7rem;
+  color: #33ff33;
+  letter-spacing: 1px;
+  border-top: 1px solid #0a160a;
+  background: #0f1f0f;
+  text-transform: uppercase;
 }
 
-#pitch-section label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #9090a8;
+/* Filename display in the LCD */
+#file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+  opacity: 0.7;
+}
+
+/* BPM readout in the LCD */
+#lcd-bpm-display {
+  opacity: 0.7;
+}
+
+/* ========================================================
+   TRANSPORT SECTION
+   Horizontal toolbar on the metal chassis housing BPM,
+   metronome LED, quantize toggle, swing slider, note repeat,
+   and transport buttons. Styled as recessed panel.
+   ======================================================== */
+
+/* The transport row on the chassis */
+#transport-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  margin: 10px 16px 0;
+  background: #b8b8b0;
+  border-radius: 4px;
+  border: 1px solid #a0a098;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.15),
+    0 1px 0 #d8d8d0;
+  flex-wrap: wrap;
+}
+
+/* Generic grouping inside transport */
+.transport-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Labels inside transport groups — silk-screened on chassis */
+.transport-group label,
+.transport-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #444444;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   white-space: nowrap;
 }
 
-/* Slider + labels wrapper */
+/* ---- BPM Group ---- */
+
+/* BPM numeric input (recessed into the chassis) */
+#bpm-input {
+  width: 48px;
+  background: #1a2b1a;
+  border: 2px solid #333333;
+  border-radius: 3px;
+  color: #33ff33;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 3px 2px;
+  outline: none;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+#bpm-input:focus {
+  border-color: #33ff33;
+}
+
+/* BPM range slider styled as a physical knob track */
+#bpm-slider {
+  width: 70px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #888880;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* BPM slider knob (physical gray knob with white indicator) */
+#bpm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
+  cursor: pointer;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#bpm-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
+  cursor: pointer;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ---- Visual Metronome LED ---- */
+/* Small circle that flashes on every beat */
+#metronome-led {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #444433;
+  border: 1px solid #333333;
+  flex-shrink: 0;
+  transition: background 0.06s, box-shadow 0.06s;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Flash state applied on each quarter-note beat */
+#metronome-led.flash {
+  background: #33ff33;
+  box-shadow:
+    0 0 6px rgba(51, 255, 51, 0.6),
+    0 0 12px rgba(51, 255, 51, 0.3);
+}
+
+/* ---- Quantize Toggle Button ---- */
+/* Small square button to toggle quantize – hardware button style */
+#quantize-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #888880;
+  background: #e6e6dc;
+  color: #666666;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+  box-shadow:
+    0 2px 0 #999990,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+}
+
+/* Active (quantize ON) state */
+#quantize-btn.active {
+  background: #ffaa00;
+  color: #333333;
+  border-color: #cc8800;
+  box-shadow:
+    0 2px 0 #996600,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Pressed quantize button */
+#quantize-btn:active {
+  box-shadow: 0 0px 0 #999990;
+  transform: translateY(2px);
+}
+
+#quantize-btn:hover {
+  border-color: #666660;
+}
+
+/* ---- Note Repeat Button ---- */
+/* Prominent toggle that lights up red when Note Repeat is active.
+   When on, held pads auto-retrigger at the current grid rate. */
+#note-repeat-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #888880;
+  background: #e6e6dc;
+  color: #666666;
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+  box-shadow:
+    0 2px 0 #999990,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+}
+
+/* Active state – lights up red */
+#note-repeat-btn.active {
+  background: #ff3333;
+  color: #ffffff;
+  border-color: #cc2222;
+  box-shadow:
+    0 2px 0 #991111,
+    0 0 8px rgba(255, 51, 51, 0.4),
+    0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Pressed note repeat button */
+#note-repeat-btn:active {
+  box-shadow: 0 0px 0 #999990;
+  transform: translateY(2px);
+}
+
+#note-repeat-btn:hover {
+  border-color: #666660;
+}
+
+/* ---- Swing Group ---- */
+
+/* Swing range slider */
+#swing-slider {
+  width: 60px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #888880;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Swing slider knob (physical gray knob) */
+#swing-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
+  cursor: pointer;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#swing-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
+  cursor: pointer;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Swing readout value */
+#swing-value {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #444444;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* ---- Transport Buttons (Rec, Play, Stop, Clear) ---- */
+/* Row of transport action buttons */
+#transport-buttons {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+/* Shared base style for transport buttons – cream hardware button */
+#transport-buttons button {
+  border: 1px solid #888880;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, box-shadow 0.1s, transform 0.06s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #e6e6dc;
+  color: #444444;
+  box-shadow:
+    0 2px 0 #999990,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Pressed state for transport buttons */
+#transport-buttons button:active {
+  box-shadow: 0 0px 0 #999990;
+  transform: translateY(2px);
+}
+
+/* Record button – default (inactive) */
+#rec-btn {
+  color: #884444;
+}
+
+#rec-btn:hover {
+  background: #ddd8d0;
+}
+
+/* Record button – active (recording) */
+#rec-btn.active {
+  background: #ff3333;
+  color: #ffffff;
+  border-color: #cc2222;
+  animation: rec-pulse 1s ease-in-out infinite;
+  box-shadow:
+    0 2px 0 #991111,
+    0 0 8px rgba(255, 51, 51, 0.4);
+}
+
+/* Pulsing glow for active record */
+@keyframes rec-pulse {
+  0%, 100% { box-shadow: 0 2px 0 #991111, 0 0 4px rgba(255, 51, 51, 0.3); }
+  50%      { box-shadow: 0 2px 0 #991111, 0 0 14px rgba(255, 51, 51, 0.6); }
+}
+
+/* Play button – default (inactive) */
+#play-btn {
+  color: #446644;
+}
+
+#play-btn:hover {
+  background: #ddd8d0;
+}
+
+/* Play button – active (playing) */
+#play-btn.active {
+  background: #33cc44;
+  color: #0e1a10;
+  border-color: #228833;
+  box-shadow:
+    0 2px 0 #116622,
+    0 0 6px rgba(51, 204, 68, 0.3);
+}
+
+/* Stop button */
+#stop-btn {
+  color: #555555;
+}
+
+#stop-btn:hover {
+  background: #ddd8d0;
+}
+
+/* Clear button */
+#clear-btn {
+  color: #555555;
+}
+
+#clear-btn:hover {
+  background: #ddd8d0;
+  color: #333333;
+}
+
+/* ========================================================
+   CONTROLS ROW — Load Sample + Pitch on the chassis
+   ======================================================== */
+
+/* Row containing Load and Pitch controls */
+#controls-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  margin: 8px 16px 0;
+  background: #b8b8b0;
+  border-radius: 4px;
+  border: 1px solid #a0a098;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.15),
+    0 1px 0 #d8d8d0;
+}
+
+/* Individual control block */
+.control-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Labels on the chassis (silk-screened text) */
+.control-block label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #444444;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* Load Sample button – hardware button style */
+#load-btn {
+  background: #e6e6dc;
+  color: #444444;
+  border: 1px solid #888880;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.1s, box-shadow 0.1s, transform 0.06s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow:
+    0 2px 0 #999990,
+    0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Pressed load button */
+#load-btn:active {
+  box-shadow: 0 0px 0 #999990;
+  transform: translateY(2px);
+}
+
+#load-btn:hover {
+  background: #ddd8d0;
+}
+
+/* Pitch slider wrapper */
 #pitch-control {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
+/* Pitch endpoint labels (-12, +12) */
 .pitch-label {
-  font-size: 0.72rem;
-  color: #5a5a70;
-  min-width: 28px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #555555;
+  min-width: 24px;
   text-align: center;
 }
 
-/* Range slider styling */
+/* Pitch range slider – hardware knob track */
 #pitch-slider {
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: #2e2e40;
+  height: 4px;
+  border-radius: 2px;
+  background: #888880;
   outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* Pitch slider knob (physical gray knob with indicator) */
 #pitch-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #3a3aff;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
   cursor: pointer;
-  border: 2px solid #1a1a24;
-  transition: background 0.15s;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
 }
 
 #pitch-slider::-webkit-slider-thumb:hover {
-  background: #5858ff;
+  border-color: #444444;
 }
 
 #pitch-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #3a3aff;
+  background: radial-gradient(circle at 40% 35%, #e0e0d8, #888880);
   cursor: pointer;
-  border: 2px solid #1a1a24;
+  border: 2px solid #555555;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Pitch readout value */
 #pitch-value {
-  font-size: 0.85rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #ffffff;
-  min-width: 46px;
+  color: #444444;
+  min-width: 42px;
   text-align: center;
 }
 
-/* ---------- Pad Grid Section ---------- */
-/* Container for the 4×4 pad layout */
+/* ========================================================
+   PAD GRID SECTION
+   4x4 grid of rubberized pads. Stone gray (#8e8e88) with
+   thick borders to create a raised, 3D hardware feel.
+   ======================================================== */
+
+/* Container for the 4x4 pad layout */
 #pads-section {
-  background: #1a1a24;
-  border: 1px solid #2a2a38;
-  border-radius: 10px;
-  padding: 20px;
+  background: #b0b0a8;
+  margin: 10px 16px 16px;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #a0a098;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.12),
+    0 1px 0 #d8d8d0;
 }
 
-/* The 4×4 grid container */
+/* The 4x4 grid container */
 #pad-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Individual sampler pad */
+/* Individual sampler pad – rubberized hardware button */
 .pad {
   aspect-ratio: 1;
   max-height: 140px;
-  background: #24243a;
-  border: 2px solid #2e2e48;
-  border-radius: 10px;
+  background: #8e8e88;
+  border: none;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  transition: background 0.1s, border-color 0.1s, transform 0.06s;
+  transition: background 0.06s, box-shadow 0.06s, transform 0.06s;
   position: relative;
   overflow: hidden;
+  /* 3D raised effect: thick bottom and right borders */
+  box-shadow:
+    3px 3px 0 #555555,
+    1px 1px 0 #666660,
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #a0a098;
+  border-left: 1px solid #a0a098;
 }
 
-/* Pad number label */
+/* Pad number label – printed on the rubber */
 .pad .pad-number {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #5a5a78;
-  transition: color 0.1s;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #555555;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: color 0.06s;
   z-index: 1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Hover state for pads */
 .pad:hover {
-  background: #2c2c4a;
-  border-color: #3a3a60;
+  background: #969690;
 }
 
-/* Active / playing state for pads */
+/* Active / playing state for pads – "pressed" into the machine */
 .pad.active {
-  background: #3a3aff;
-  border-color: #5c5cff;
-  transform: scale(0.96);
+  background: #a8a8a1;
+  box-shadow:
+    0px 0px 0 #555555,
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: translateY(2px);
+  border-top: 1px solid #888880;
+  border-left: 1px solid #888880;
 }
 
 .pad.active .pad-number {
-  color: #ffffff;
+  color: #333333;
 }
 
-/* Glow effect behind active pad */
+/* Remove the glow effect — hardware pads don't glow */
 .pad.active::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 12px;
-  background: rgba(58, 58, 255, 0.25);
-  z-index: 0;
-  animation: pad-glow 0.3s ease-out forwards;
-}
-
-@keyframes pad-glow {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  display: none;
 }
 
 /* Disabled state (before sample is loaded) */
 .pad.disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
   pointer-events: none;
 }
 
-/* ---------- Responsive ---------- */
+/* ========================================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================================== */
+
 /* Adjust layout for smaller screens */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
+  #chassis {
+    flex-direction: row;
+  }
+
+  .wood-panel {
+    width: 16px;
+  }
+
   #pad-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .pad {
-    border-radius: 8px;
+    border-radius: 3px;
   }
 
   .pad .pad-number {
-    font-size: 1rem;
-  }
-
-  #pitch-section {
-    flex-wrap: wrap;
+    font-size: 0.9rem;
   }
 
   #transport-section {
-    gap: 10px;
+    gap: 8px;
+    padding: 10px 12px;
   }
 
   #bpm-slider {
-    width: 60px;
+    width: 50px;
   }
 
   #swing-slider {
-    width: 50px;
+    width: 40px;
   }
 
   #transport-buttons {
@@ -730,7 +1029,29 @@ body {
 
   #transport-buttons button {
     flex: 1;
-    padding: 7px 6px;
-    font-size: 0.72rem;
+    padding: 6px 4px;
+    font-size: 0.65rem;
+  }
+
+  #controls-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #brand-name {
+    font-size: 1.2rem;
+  }
+
+  .model-desc {
+    display: none;
+  }
+
+  #designer-signature {
+    font-size: 0.9rem;
+  }
+
+  #lcd-splash {
+    font-size: 0.55rem;
+    letter-spacing: 1px;
   }
 }
