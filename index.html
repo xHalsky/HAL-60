@@ -145,11 +145,15 @@
           </div>
           <!-- Mode toggle: PAD grid ↔ TR-style Step Sequencer -->
           <div class="transport-group" id="mode-switch-group">
-            <span class="transport-label">PAD</span>
-            <div id="mode-switch" title="Toggle between Pad Grid and Step Sequencer">
-              <div class="mode-switch-lever"></div>
+            <div id="mode-switch" data-position="0" title="Toggle between Pad Grid and Step Sequencer">
+              <div class="mode-labels">
+                <span class="mode-label" data-val="pad">PAD</span>
+                <span class="mode-label" data-val="seq">SEQ</span>
+              </div>
+              <div class="mode-track">
+                <div class="mode-cap"></div>
+              </div>
             </div>
-            <span class="transport-label">SEQ</span>
           </div>
         </div>
 

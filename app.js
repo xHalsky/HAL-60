@@ -912,15 +912,29 @@ window.addEventListener("blur", () => {
 });
 
 // ============================================================
-// MODE SWITCH — Pad Grid ↔ Step Sequencer
+// MODE SWITCH — Pad Grid ↔ Step Sequencer (2-position horizontal toggle)
 // ============================================================
 
-modeSwitch.addEventListener("click", () => {
+function setMode(isSeq) {
+  seqMode = isSeq;
+  modeSwitch.dataset.position = isSeq ? "1" : "0";
+  padsSection.style.display = isSeq ? "none" : "";
+  stepSeqContainer.style.display = isSeq ? "" : "none";
+}
+
+// Click on track toggles position
+modeSwitch.querySelector(".mode-track").addEventListener("click", () => {
   ensureAudioContext();
-  seqMode = !seqMode;
-  modeSwitch.classList.toggle("seq-mode", seqMode);
-  padsSection.style.display = seqMode ? "none" : "";
-  stepSeqContainer.style.display = seqMode ? "" : "none";
+  setMode(!seqMode);
+});
+
+// Click on individual labels snaps to that mode
+modeSwitch.querySelectorAll(".mode-label").forEach((lbl) => {
+  lbl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    ensureAudioContext();
+    setMode(lbl.dataset.val === "seq");
+  });
 });
 
 // ============================================================
