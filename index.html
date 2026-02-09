@@ -96,43 +96,37 @@
       <!-- Hidden file input (used by the digital LOAD button) -->
       <input type="file" id="file-input" accept="audio/*" hidden />
 
-      <!-- Transport Controls: BPM, Metronome, Quantize, Swing, Rec/Play/Stop -->
+      <!-- Transport Controls: two distinct horizontal rows -->
       <section id="transport-section">
 
-        <!-- BPM control group with Data Entry buttons -->
-        <div class="transport-group" id="bpm-group">
-          <label>BPM</label>
-          <button id="bpm-dec" class="data-entry-btn" title="Decrease BPM">&minus;</button>
-          <input type="number" id="bpm-input" min="60" max="90" value="70" step="1" />
-          <button id="bpm-inc" class="data-entry-btn" title="Increase BPM">+</button>
+        <!-- Row 1: Rhythmic controls (BPM, Click, Quantize, Swing, Note Repeat) -->
+        <div id="transport-row-1">
+          <div class="transport-group" id="bpm-group">
+            <label>BPM</label>
+            <button id="bpm-dec" class="data-entry-btn" title="Decrease BPM">&minus;</button>
+            <input type="number" id="bpm-input" min="60" max="90" value="70" step="1" />
+            <button id="bpm-inc" class="data-entry-btn" title="Increase BPM">+</button>
+          </div>
+          <div class="transport-group" id="metro-group">
+            <button id="metro-btn" title="Toggle metronome click">CLICK</button>
+            <div id="metronome-led" title="Beat indicator"></div>
+          </div>
+          <div class="transport-group" id="quantize-group">
+            <button id="quantize-btn" class="active" title="Snap recorded hits to 1/32 grid">Q</button>
+            <span class="transport-label">1/32</span>
+          </div>
+          <div class="transport-group" id="swing-group">
+            <label for="swing-slider">SWING</label>
+            <input type="range" id="swing-slider" min="50" max="75" value="50" step="1" />
+            <span id="swing-value">50%</span>
+          </div>
+          <div class="transport-group" id="note-repeat-group">
+            <button id="note-repeat-btn" title="Note Repeat: auto-retrigger held pads on 1/32 grid (hold Shift = momentary)">NR</button>
+            <span class="transport-label">REPEAT</span>
+          </div>
         </div>
 
-        <!-- Metronome Click toggle with status LED -->
-        <div class="transport-group" id="metro-group">
-          <button id="metro-btn" title="Toggle metronome click">CLICK</button>
-          <div id="metronome-led" title="Beat indicator"></div>
-        </div>
-
-        <!-- Quantize toggle -->
-        <div class="transport-group" id="quantize-group">
-          <button id="quantize-btn" class="active" title="Snap recorded hits to 1/32 grid">Q</button>
-          <span class="transport-label">1/32</span>
-        </div>
-
-        <!-- Swing control -->
-        <div class="transport-group" id="swing-group">
-          <label for="swing-slider">SWING</label>
-          <input type="range" id="swing-slider" min="50" max="75" value="50" step="1" />
-          <span id="swing-value">50%</span>
-        </div>
-
-        <!-- Note Repeat toggle -->
-        <div class="transport-group" id="note-repeat-group">
-          <button id="note-repeat-btn" title="Note Repeat: auto-retrigger held pads on 1/32 grid (hold Shift = momentary)">NR</button>
-          <span class="transport-label">REPEAT</span>
-        </div>
-
-        <!-- Transport buttons: Record, Play, Stop, Clear -->
+        <!-- Row 2: Transport buttons (Rec, Play, Stop, Clear) -->
         <div id="transport-buttons">
           <button id="rec-btn" title="Record pad hits into the loop">&#9679; REC</button>
           <button id="play-btn" title="Play / loop the sequence">&#9654; PLAY</button>
