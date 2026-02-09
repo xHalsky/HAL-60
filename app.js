@@ -68,7 +68,8 @@ const padGrid = document.getElementById("pad-grid");
 
 // Transport
 const bpmInput = document.getElementById("bpm-input");
-const bpmSlider = document.getElementById("bpm-slider");
+const bpmDec = document.getElementById("bpm-dec");
+const bpmInc = document.getElementById("bpm-inc");
 const metroBtn = document.getElementById("metro-btn");
 const metronomeLed = document.getElementById("metronome-led");
 const quantizeBtn = document.getElementById("quantize-btn");
@@ -569,17 +570,16 @@ bumpSlider.addEventListener("input", () => {
 // ============================================================
 
 function setBpm(val) {
-  bpm = Math.max(60, Math.min(90, Number(val) || 70));
+  bpm = Math.max(60, Math.min(90, Math.round(Number(val) || 70)));
   bpmInput.value = bpm;
-  bpmSlider.value = bpm;
-  // Update LCD BPM display
   if (lcdBpmDisplay) {
     lcdBpmDisplay.textContent = bpm + " BPM";
   }
 }
 
 bpmInput.addEventListener("change", () => setBpm(bpmInput.value));
-bpmSlider.addEventListener("input", () => setBpm(bpmSlider.value));
+bpmDec.addEventListener("click", () => setBpm(bpm - 1));
+bpmInc.addEventListener("click", () => setBpm(bpm + 1));
 
 // ============================================================
 // QUANTIZE TOGGLE
