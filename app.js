@@ -1,7 +1,7 @@
 // ============================================================
 // SlicePad – 16-Pad Audio Sampler with Sequencer (app.js)
 // Wavesurfer.js v7 (ES module) + Web Audio API
-// Features: 16-pad sampler, mute-group, 8-bar loop recorder,
+// Features: 16-pad sampler, mute-group, 4-bar loop recorder,
 //           quantize (1/32), MPC-style swing, visual metronome,
 //           MPC-style note repeat (Shift = momentary).
 // Visual: MPC 60 vintage aesthetic with dot-matrix LCD.
@@ -15,12 +15,12 @@ import RegionsPlugin from "https://unpkg.com/wavesurfer.js@7/dist/plugins/region
 // ============================================================
 
 const NUM_PADS = 16;
-const BARS = 8;
+const BARS = 4;
 const BEATS_PER_BAR = 4;
 const THIRTYSECONDS_PER_BEAT = 8;    // 1/32-note resolution per beat
 const SIXTEENTHS_PER_BEAT = 4;       // Used for swing grouping (16th-note level)
 const STEPS_PER_SIXTEENTH = 2;       // Two 32nds make one 16th
-const TOTAL_STEPS = BARS * BEATS_PER_BAR * THIRTYSECONDS_PER_BEAT; // 256
+const TOTAL_STEPS = BARS * BEATS_PER_BAR * THIRTYSECONDS_PER_BEAT; // 128
 
 // Per-pad region colours – pixel-green shades for the LCD display
 const PAD_COLORS = [
@@ -118,7 +118,7 @@ let shiftHeld = false;               // Momentary via Shift key
 const mousePressedPads = new Set();  // Pads held via mouse / touch
 const keyPressedPads = new Set();    // Pads held via keyboard
 
-// Sequence buffer: 256 slots (one per 32nd note), each null or a sliceId (0-15)
+// Sequence buffer: 128 slots (one per 32nd note across 4 bars), each null or a sliceId (0-15)
 let sequence = new Array(TOTAL_STEPS).fill(null);
 
 // Look-ahead scheduler state
@@ -171,7 +171,7 @@ for (let i = 0; i < NUM_PADS; i++) {
 }
 
 // ============================================================
-// BUILD PROGRESS BAR TICK MARKS (256 × 1/32nd note grid)
+// BUILD PROGRESS BAR TICK MARKS (128 × 1/32nd note grid, 4 bars)
 // Four-level hierarchy: bar → beat → 16th → 32nd micro-tick
 // ============================================================
 
