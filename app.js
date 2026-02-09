@@ -252,53 +252,10 @@ for (let i = 0; i < NUM_PADS; i++) {
 
 // ============================================================
 // BUILD STEP SEQUENCER DOM
-// 4 tracks × 16 steps, with VOL/PITCH dials per track.
+// 4 tracks × 16 steps per track.
 // ============================================================
 
 const seqStepElements = []; // [track][step] for quick playhead access
-
-function buildDial(label, initialVal, onChange, min, max, step) {
-  const dial = document.createElement("div");
-  dial.className = "seq-dial";
-
-  const lbl = document.createElement("span");
-  lbl.className = "seq-dial-label";
-  lbl.textContent = label;
-  dial.appendChild(lbl);
-
-  const decBtn = document.createElement("button");
-  decBtn.className = "seq-dial-btn";
-  decBtn.textContent = "\u2212";
-  dial.appendChild(decBtn);
-
-  const valSpan = document.createElement("span");
-  valSpan.className = "seq-dial-val";
-  valSpan.textContent = initialVal;
-  dial.appendChild(valSpan);
-
-  const incBtn = document.createElement("button");
-  incBtn.className = "seq-dial-btn";
-  incBtn.textContent = "+";
-  dial.appendChild(incBtn);
-
-  decBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    let v = parseInt(valSpan.textContent, 10) - step;
-    v = Math.max(min, Math.min(max, v));
-    valSpan.textContent = v;
-    onChange(v);
-  });
-
-  incBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    let v = parseInt(valSpan.textContent, 10) + step;
-    v = Math.max(min, Math.min(max, v));
-    valSpan.textContent = v;
-    onChange(v);
-  });
-
-  return dial;
-}
 
 function buildStepSequencer() {
   stepSeqContainer.innerHTML = "";
@@ -309,35 +266,11 @@ function buildStepSequencer() {
     const row = document.createElement("div");
     row.className = "seq-track";
 
-    // ---- Track info panel ----
-    const info = document.createElement("div");
-    info.className = "seq-track-info";
-
-    const name = document.createElement("span");
-    name.className = "seq-track-name";
-    name.textContent = TRACK_NAMES[tr];
-    info.appendChild(name);
-
-    const dials = document.createElement("div");
-    dials.className = "seq-dials";
-
-    // Volume dial (0-100, step 5)
-    const volDial = buildDial("V", drumTrackVol[tr], (val) => {
-      drumTrackVol[tr] = val;
-      if (drumGainNodes[tr]) {
-        drumGainNodes[tr].gain.value = val / 100;
-      }
-    }, 0, 100, 5);
-    dials.appendChild(volDial);
-
-    // Pitch dial (-12 to +12, step 1)
-    const pitDial = buildDial("P", drumTrackPitch[tr], (val) => {
-      drumTrackPitch[tr] = val;
-    }, -12, 12, 1);
-    dials.appendChild(pitDial);
-
-    info.appendChild(dials);
-    row.appendChild(info);
+    // ---- Track label ----
+    const label = document.createElement("span");
+    label.className = "seq-track-name";
+    label.textContent = TRACK_NAMES[tr];
+    row.appendChild(label);
 
     // ---- 16 step buttons ----
     const steps = document.createElement("div");

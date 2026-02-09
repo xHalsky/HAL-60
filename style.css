@@ -1220,90 +1220,24 @@ body {
   margin-bottom: 0;
 }
 
-/* Track info panel — name + vol/pitch dials */
-.seq-track-info {
-  width: 72px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-}
-
 /* Track name label (KICK, SNARE, etc.) */
 .seq-track-name {
+  width: 44px;
+  flex-shrink: 0;
   font-size: 0.6rem;
   font-weight: 800;
   color: #333333;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: right;
+  padding-right: 6px;
 }
 
-/* Compact row for VOL/PITCH digital readouts */
-.seq-dials {
-  display: flex;
-  gap: 4px;
-}
-
-/* Single dial unit (label + buttons + value) */
-.seq-dial {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-
-/* Dial label (V, P) */
-.seq-dial-label {
-  font-size: 0.5rem;
-  font-weight: 700;
-  color: #555555;
-  text-transform: uppercase;
-  min-width: 8px;
-}
-
-/* Dial value readout (mini LCD) */
-.seq-dial-val {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: #33ff33;
-  background: #1a2b1a;
-  border: 1px solid #333333;
-  border-radius: 2px;
-  padding: 1px 3px;
-  min-width: 20px;
-  text-align: center;
-  text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);
-}
-
-/* Tiny +/- buttons for dial adjustment */
-.seq-dial-btn {
-  width: 14px;
-  height: 14px;
-  border: 1px solid #888880;
-  border-radius: 2px;
-  background: #e6e6dc;
-  color: #333333;
-  font-size: 0.6rem;
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-}
-
-.seq-dial-btn:active {
-  background: #cccccc;
-  transform: translateY(1px);
-}
-
-/* 16-step grid container per track */
+/* 16-step grid container per track — fills remaining width */
 .seq-steps {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
-  gap: 2px;
+  gap: 4px;
   flex: 1;
 }
 
