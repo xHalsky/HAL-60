@@ -1044,3 +1044,51 @@ document.addEventListener("keyup", (e) => {
     keyPressedPads.delete(padIdx);
   }
 });
+
+// ============================================================
+// HARDWARE BOOT SEQUENCE
+// Simulates a vintage CRT startup on page load:
+//   Stage 1 — LCD flickers on (hardware-on CSS animation).
+//   Stage 2 — Diagnostic text appears line-by-line.
+//   Stage 3 — After ~1.5 s the boot text clears and the main
+//             UI is revealed with a brief phosphor flash.
+// Total duration ≈ 2 seconds.  Non-blocking; the app is fully
+// interactive (pads, transport, etc.) throughout.
+// ============================================================
+
+(function runBootSequence() {
+  const lcdScreen = document.getElementById("lcd-screen");
+  const bootOverlay = document.getElementById("boot-overlay");
+
+  const bootLines = [
+    "HAL-60 SYSTEM V1.0",
+    "COPYRIGHT (C) 1988 HALSKY",
+    "CHECKING RAM... 1024K OK",
+    "MOUNTING BUMPLER OS...",
+  ];
+
+  // Stage 1: Power on — add .booting to trigger the hardware-on animation,
+  // hide the normal UI content, and show the boot overlay + scan bar.
+  lcdScreen.classList.add("booting");
+  bootOverlay.textContent = "";
+
+  // Stage 2: Diagnostic text appears line-by-line on the LCD
+  bootLines.forEach((line, i) => {
+    setTimeout(() => {
+      bootOverlay.textContent += (i > 0 ? "\n" : "") + line;
+    }, 300 + i * 280);
+  });
+
+  // Stage 3: Boot complete — flash and reveal the main Bumpler interface
+  const revealTime = 300 + (bootLines.length - 1) * 280 + 500; // ≈ 1640 ms
+  setTimeout(() => {
+    // Remove boot state (re-shows splash, progress bar, waveform, etc.)
+    lcdScreen.classList.remove("booting");
+
+    // Brief brightness flash to simulate the final CRT "lock-in"
+    lcdScreen.classList.add("boot-reveal");
+    setTimeout(() => {
+      lcdScreen.classList.remove("boot-reveal");
+    }, 200);
+  }, revealTime);
+})();
