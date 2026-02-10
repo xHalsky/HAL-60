@@ -1577,3 +1577,34 @@ document.addEventListener("keyup", (e) => {
     }, 200);
   }, revealTime);
 })();
+
+// ============================================================
+// FACTORY DEMO LOAD
+// Automatically loads a demo sample on startup to ensure the 
+// HAL-60 is ready to play immediately after the boot sequence.
+// ============================================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Wait for Wavesurfer to be ready
+  if (wavesurfer) {
+    const demoPath = 'samples/demo.wav';
+    
+    // Update LCD text to show loading status
+    fileNameEl.textContent = "LOADING FACTORY DEMO...";
+    
+    // Load the file from the samples folder
+    fetch(demoPath)
+      .then(response => {
+        if (!response.ok) throw new Error('Demo file not found');
+        return response.blob();
+      })
+      .then(blob => {
+        const file = new File([blob], "demo.wav", { type: "audio/wav" });
+        loadFile(file);
+      })
+      .catch(err => {
+        console.warn("Factory demo load skipped:", err.message);
+        fileNameEl.textContent = "NO FILE LOADED";
+      });
+  }
+});
