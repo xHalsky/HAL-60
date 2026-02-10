@@ -1100,13 +1100,13 @@ function scheduleNote(step, time) {
     }
   }
 
-  // ---- Drum Pattern: trigger TR steps at quantize-resolution boundaries ----
-  // 1/8  mode → fire every 4 internal steps (16 steps = 2 bars)
-  // 1/16 mode → fire every 2 internal steps (16 steps = 1 bar)
-  // 1/32 mode → fire every 1 internal step  (16 steps = 2 beats)
-  const drumStepInterval = (quantizeRes === 32) ? 1 : (quantizeRes === 16) ? 2 : 4;
-  if (barStep % drumStepInterval === 0) {
-    const drumStepIndex = Math.floor(barStep / drumStepInterval) % SEQ_STEPS;
+  // ---- Drum Pattern: 16 steps span exactly 2 bars (half the 4-bar loop) ----
+  // Fixed interval of 4 internal 32nd-note steps per drum step (= 1 eighth note).
+  // 16 eighth notes = 8 beats = 2 bars. The pattern plays twice per 4-bar loop.
+  const drumHalfLoop = step % (stepsPerBar * 2);
+  const drumStepInterval = 4;
+  if (drumHalfLoop % drumStepInterval === 0) {
+    const drumStepIndex = Math.floor(drumHalfLoop / drumStepInterval);
     for (let tr = 0; tr < DRUM_TRACKS; tr++) {
       if (drumPattern[tr][drumStepIndex]) {
         playDrumSound(tr, time);
