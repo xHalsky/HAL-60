@@ -748,6 +748,49 @@ function highlightPad(index) {
 }
 
 // ============================================================
+// SLICE HIGHLIGHT — LCD waveform region glow on pad trigger
+// Directly injects inline styles on the Wavesurfer region
+// element for a bright CRT phosphor flash. Bypasses CSS file
+// to guarantee visibility over Wavesurfer's own rendering.
+// ============================================================
+
+const sliceHighlightTimers = {};
+
+function highlightSlice(index) {
+  if (index < 0 || index >= regions.length) return;
+  const region = regions[index];
+  if (!region || !region.wsRegion) return;
+
+  // Wavesurfer v7: try wsRegion.element, then region.element
+  const el = region.wsRegion.element || region.element;
+  if (!el) return;
+
+  // Store original background so we can restore it
+  const originalBg = el.style.backgroundColor || "";
+
+  // Inject glow styles directly
+  el.style.backgroundColor = "rgba(204, 255, 204, 0.5)";
+  el.style.boxShadow = "0 0 15px rgba(51, 255, 51, 0.52)";
+  el.style.zIndex = "10";
+
+  // Force repaint
+  void el.offsetHeight;
+
+  // Clear any existing timer for this slice
+  if (sliceHighlightTimers[index]) {
+    clearTimeout(sliceHighlightTimers[index]);
+  }
+
+  // Reset to original style after 150ms
+  sliceHighlightTimers[index] = setTimeout(() => {
+    el.style.backgroundColor = originalBg;
+    el.style.boxShadow = "none";
+    el.style.zIndex = "";
+    delete sliceHighlightTimers[index];
+  }, 150);
+}
+
+// ============================================================
 // TRIGGER PAD — called by user interaction (click / keyboard)
 // Plays the slice + records if recording.
 // ============================================================
@@ -757,6 +800,7 @@ function triggerPad(index) {
 
   playSlice(index);
   highlightPad(index);
+  highlightSlice(index);
 
   // If recording + playing, capture event
   if (isRecording && isPlaying) {
@@ -1100,13 +1144,12 @@ function scheduleNote(step, time) {
     }
   }
 
-  // ---- Drum Pattern: 16 steps span exactly 2 bars (half the 4-bar loop) ----
-  // Fixed interval of 4 internal 32nd-note steps per drum step (= 1 eighth note).
-  // 16 eighth notes = 8 beats = 2 bars. The pattern plays twice per 4-bar loop.
-  const drumHalfLoop = step % (stepsPerBar * 2);
-  const drumStepInterval = 4;
-  if (drumHalfLoop % drumStepInterval === 0) {
-    const drumStepIndex = Math.floor(drumHalfLoop / drumStepInterval);
+  // ---- Drum Pattern: 16 steps span exactly 1 bar (quarter of the 4-bar loop) ----
+  // Fixed interval of 2 internal 32nd-note steps per drum step (= 1 sixteenth note).
+  // 16 sixteenth notes = 4 beats = 1 bar ≈ 3.43s at 70 BPM. Pattern plays 4× per loop.
+  const drumStepInterval = 2;
+  if (barStep % drumStepInterval === 0) {
+    const drumStepIndex = Math.floor(barStep / drumStepInterval);
     for (let tr = 0; tr < DRUM_TRACKS; tr++) {
       if (drumPattern[tr][drumStepIndex]) {
         playDrumSound(tr, time);
@@ -1124,7 +1167,10 @@ function scheduleNote(step, time) {
 
     // Defer visual highlight to match audio timing
     const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
-    setTimeout(() => highlightPad(sliceId), delay);
+    setTimeout(() => {
+      highlightPad(sliceId);
+      highlightSlice(sliceId);
+    }, delay);
   }
 
   // ---- Note Repeat: re-trigger held pads at every 1/32 step ----
@@ -1136,7 +1182,10 @@ function scheduleNote(step, time) {
         playSlice(padIdx, time);
 
         const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
-        setTimeout(() => highlightPad(padIdx), delay);
+        setTimeout(() => {
+          highlightPad(padIdx);
+          highlightSlice(padIdx);
+        }, delay);
 
         // Record note-repeat hits into the sequence while recording
         if (isRecording) {
