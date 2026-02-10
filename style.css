@@ -1562,5 +1562,32 @@ svg.btn-icon {
   background: #d8d8d8;
 }
 
-/* Fixed-width chassis — no responsive breakpoints needed.
-   Horizontal scrollbar appears if the viewport is narrower than 700px. */
+
+/* ========================================================
+   RESPONSIVE SCALING — Non-Destructive Mobile Support
+   The 700px chassis remains rigid. On narrow viewports,
+   transform: scale() shrinks the entire unit proportionally.
+   ======================================================== */
+
+/* Body overflow safety net */
+body {
+  overflow-x: hidden;
+}
+
+/* Viewport clipping frame — kills ghost footprint */
+#viewport-frame {
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* Scale wrapper — shrinks the 700px chassis to fit viewport */
+#scale-wrapper {
+  transform-origin: top center;
+  /* JS will set: transform: scale(factor); height: intrinsic * factor; */
+}

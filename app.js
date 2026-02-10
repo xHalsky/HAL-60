@@ -58,30 +58,30 @@ const PAD_COLORS = [
 const DRUM_BANKS = [
   {
     name: "A",
-    kick:   { freq: 150, endFreq: 40, decay: 0.3, tone: 0.8 },
-    snare:  { toneFreq: 180, noiseDecay: 0.15, filterFreq: 3000, tone: 0.5 },
-    hihat:  { filterFreq: 8000, decay: 0.05, q: 1 },
+    kick: { freq: 150, endFreq: 40, decay: 0.3, tone: 0.8 },
+    snare: { toneFreq: 180, noiseDecay: 0.15, filterFreq: 3000, tone: 0.5 },
+    hihat: { filterFreq: 8000, decay: 0.05, q: 1 },
     cymbal: { filterFreq: 5000, decay: 0.4, q: 1 },
   },
   {
     name: "B",
-    kick:   { freq: 180, endFreq: 35, decay: 0.4, tone: 0.9 },
-    snare:  { toneFreq: 200, noiseDecay: 0.2, filterFreq: 4000, tone: 0.6 },
-    hihat:  { filterFreq: 9000, decay: 0.04, q: 1.5 },
+    kick: { freq: 180, endFreq: 35, decay: 0.4, tone: 0.9 },
+    snare: { toneFreq: 200, noiseDecay: 0.2, filterFreq: 4000, tone: 0.6 },
+    hihat: { filterFreq: 9000, decay: 0.04, q: 1.5 },
     cymbal: { filterFreq: 6000, decay: 0.5, q: 1.5 },
   },
   {
     name: "C",
-    kick:   { freq: 120, endFreq: 50, decay: 0.25, tone: 0.7 },
-    snare:  { toneFreq: 160, noiseDecay: 0.12, filterFreq: 2500, tone: 0.4 },
-    hihat:  { filterFreq: 10000, decay: 0.03, q: 2 },
+    kick: { freq: 120, endFreq: 50, decay: 0.25, tone: 0.7 },
+    snare: { toneFreq: 160, noiseDecay: 0.12, filterFreq: 2500, tone: 0.4 },
+    hihat: { filterFreq: 10000, decay: 0.03, q: 2 },
     cymbal: { filterFreq: 7000, decay: 0.35, q: 0.8 },
   },
   {
     name: "D",
-    kick:   { freq: 200, endFreq: 30, decay: 0.5, tone: 1.0 },
-    snare:  { toneFreq: 220, noiseDecay: 0.25, filterFreq: 3500, tone: 0.7 },
-    hihat:  { filterFreq: 7000, decay: 0.06, q: 0.8 },
+    kick: { freq: 200, endFreq: 30, decay: 0.5, tone: 1.0 },
+    snare: { toneFreq: 220, noiseDecay: 0.25, filterFreq: 3500, tone: 0.7 },
+    hihat: { filterFreq: 7000, decay: 0.06, q: 0.8 },
     cymbal: { filterFreq: 4500, decay: 0.6, q: 1.2 },
   },
 ];
@@ -147,6 +147,36 @@ const bankValueEl = document.getElementById("bank-value");
 // Slice-mode switch (LCD digital toggle: 16 / 32)
 const sliceModeSwitch = document.getElementById("slice-mode-switch");
 const sliceModeLabels = sliceModeSwitch.querySelectorAll(".slice-mode-label");
+
+// ============================================================
+// RESPONSIVE SCALING — Non-Destructive Mobile Support
+// Applies transform: scale() to the #scale-wrapper when
+// viewport width < 720px. Fixes ghost footprint by setting
+// wrapper height to chassis.offsetHeight × scaleFactor.
+// ============================================================
+
+function applyResponsiveScale() {
+  var chassis = document.getElementById('chassis');
+  var wrapper = document.getElementById('scale-wrapper');
+  if (!chassis || !wrapper) return;
+
+  var designWidth = 720; /* 700px chassis + 2×10px breathing room */
+  var vw = window.innerWidth;
+
+  if (vw >= designWidth) {
+    /* Desktop — no scaling needed */
+    wrapper.style.transform = 'none';
+    wrapper.style.height = 'auto';
+  } else {
+    var factor = vw / designWidth;
+    wrapper.style.transform = 'scale(' + factor + ')';
+    /* Fix ghost footprint: collapse wrapper height to match visual size */
+    wrapper.style.height = (chassis.offsetHeight * factor) + 'px';
+  }
+}
+
+applyResponsiveScale();
+window.addEventListener('resize', applyResponsiveScale);
 
 // ============================================================
 // STATE
@@ -831,7 +861,7 @@ function updatePitch(newVal) {
   if (currentSource) {
     try {
       currentSource.playbackRate.value = Math.pow(2, semitones / 12);
-    } catch (_) {}
+    } catch (_) { }
   }
 }
 
@@ -1475,9 +1505,9 @@ function clearSeqPlayhead() {
 
 // Pad mapping: 1234 / QWER / ASDF / ZXCV → pads 1-16
 const keyMap = {
-  "1": 0,  "2": 1,  "3": 2,  "4": 3,
-  "q": 4,  "w": 5,  "e": 6,  "r": 7,
-  "a": 8,  "s": 9,  "d": 10, "f": 11,
+  "1": 0, "2": 1, "3": 2, "4": 3,
+  "q": 4, "w": 5, "e": 6, "r": 7,
+  "a": 8, "s": 9, "d": 10, "f": 11,
   "z": 12, "x": 13, "c": 14, "v": 15,
 };
 
@@ -1588,10 +1618,10 @@ window.addEventListener('DOMContentLoaded', () => {
   // Wait for Wavesurfer to be ready
   if (wavesurfer) {
     const demoPath = 'samples/demo.wav';
-    
+
     // Update LCD text to show loading status
     fileNameEl.textContent = "LOADING FACTORY DEMO...";
-    
+
     // Load the file from the samples folder
     fetch(demoPath)
       .then(response => {

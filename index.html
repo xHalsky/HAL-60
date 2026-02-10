@@ -1,212 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SlicePad – 16-Pad Audio Sampler</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-  <!-- Outer chassis wrapper with wood side panels -->
-  <div id="chassis">
+  <!-- Viewport frame — clips overflow for responsive scaling -->
+  <div id="viewport-frame">
+    <!-- Scale wrapper — applies transform: scale() -->
+    <div id="scale-wrapper">
 
-    <!-- Left wood end-cheek panel -->
-    <div class="wood-panel wood-left"></div>
+      <!-- Outer chassis wrapper with wood side panels -->
+      <div id="chassis">
 
-    <!-- Main metal body of the machine -->
-    <div id="app">
+        <!-- Left wood end-cheek panel -->
+        <div class="wood-panel wood-left"></div>
 
-      <!-- Header: Branding printed on the metal chassis -->
-      <header id="header">
-        <!-- Chassis logo (top-left) — "HAL-60" nameplate with subtitle -->
-        <div id="header-brand">
-          <div id="brand-nameplate">
-            <span id="brand-name">HAL-60</span>
-            <div id="brand-divider"></div>
-            <span id="brand-subtitle">THE BUMPLER</span>
-          </div>
-          <span class="model-desc">SAMPLING PRODUCTION CENTER</span>
-        </div>
-        <!-- Designer branding (top-right): logo + signature -->
-        <div id="header-signature">
-          <div id="logo-container">
-            <img src="assets/logo.png" alt="Halsky Labs" id="logo-img" />
-          </div>
-          <span id="designer-signature">Halsky<br>Labs</span>
-        </div>
-      </header>
+        <!-- Main metal body of the machine -->
+        <div id="app">
 
-      <!-- LCD Dot-Matrix Screen: waveform + progress + transport info -->
-      <section id="lcd-screen">
-
-        <!-- Scanline overlay for CRT / dot-matrix effect -->
-        <div id="lcd-scanlines"></div>
-
-        <!-- Count-in overlay: shows large beat countdown during pre-roll -->
-        <div id="count-in-display"></div>
-
-        <!-- Boot sequence diagnostic text overlay -->
-        <div id="boot-overlay"></div>
-
-        <!-- CRT warm-up horizontal scan bar -->
-        <div id="boot-scanbar"></div>
-
-        <!-- LCD splash / digital branding line -->
-        <div id="lcd-splash">HAL-60 v1.0 // BUMPLER MODE</div>
-
-        <!-- 4-bar loop progress bar with 1/32nd-note grid ticks + slice mode switch -->
-        <div id="loop-progress-row">
-          <div id="loop-progress">
-            <div id="loop-progress-fill"></div>
-            <div id="loop-progress-ticks">
-              <!-- 128 tick marks will be injected by JS -->
-            </div>
-            <!-- Dim overlay for the inactive zone in 16-slice mode -->
-            <div id="loop-progress-dim"></div>
-          </div>
-          <!-- Digital 2-position toggle: 16-slice (HALF) / 32-slice (FULL) -->
-          <div id="slice-mode-switch" data-mode="32" title="Toggle 16/32 slice loop length">
-            <span class="slice-mode-label" data-val="16">16</span>
-            <div class="slice-mode-track">
-              <div class="slice-mode-cap"></div>
-            </div>
-            <span class="slice-mode-label" data-val="32">32</span>
-          </div>
-        </div>
-
-        <!-- Waveform viewer (inside the LCD) -->
-        <div id="waveform-area">
-          <div id="drop-zone">
-            <div id="drop-zone-text">
-              <p>DROP SAMPLE HERE<br /><small>OR PRESS "LOAD"</small></p>
-            </div>
-            <div id="waveform"></div>
-          </div>
-        </div>
-
-        <!-- Digital controls row inside the LCD (beneath the waveform) -->
-        <div id="lcd-controls">
-          <button id="load-btn" class="lcd-btn" title="Load an audio file">[ LOAD ]</button>
-          <span class="lcd-divider">|</span>
-          <div class="lcd-control-group">
-            <button id="pitch-dec" class="lcd-btn" title="Pitch down">-</button>
-            <span id="pitch-value">PITCH: 0 ST</span>
-            <button id="pitch-inc" class="lcd-btn" title="Pitch up">+</button>
-          </div>
-          <span class="lcd-divider">|</span>
-          <div class="lcd-control-group">
-            <button id="bump-dec" class="lcd-btn" title="Less compression">-</button>
-            <span id="bump-value">BUMP: -24 dB</span>
-            <button id="bump-inc" class="lcd-btn" title="More compression">+</button>
-          </div>
-          <span class="lcd-divider">|</span>
-          <div class="lcd-control-group">
-            <button id="bank-dec" class="lcd-btn" title="Previous drum bank">&lt;</button>
-            <span id="bank-value">BANK: A</span>
-            <button id="bank-inc" class="lcd-btn" title="Next drum bank">&gt;</button>
-          </div>
-        </div>
-
-        <!-- LCD footer info line -->
-        <div id="lcd-info">
-          <span id="file-name">NO FILE LOADED</span>
-          <span id="lcd-bpm-display">70 BPM</span>
-        </div>
-
-      </section>
-
-      <!-- Hidden file input (used by the digital LOAD button) -->
-      <input type="file" id="file-input" accept="audio/*" hidden />
-
-      <!-- Transport Controls: two distinct horizontal rows -->
-      <section id="transport-section">
-
-        <!-- Row 1: Rhythmic controls (BPM, Click, Quantize, Swing, Note Repeat) -->
-        <div id="transport-row-1">
-          <div class="transport-group" id="bpm-group">
-            <label>BPM</label>
-            <button id="bpm-dec" class="data-entry-btn" title="Decrease BPM">&minus;</button>
-            <input type="number" id="bpm-input" min="60" max="90" value="70" step="1" />
-            <button id="bpm-inc" class="data-entry-btn" title="Increase BPM">+</button>
-          </div>
-          <div class="transport-group" id="metro-group">
-            <button id="metro-btn" title="Toggle metronome click">
-              <span class="metro-led" id="metronome-led"></span>
-              CLICK
-            </button>
-          </div>
-          <div class="transport-group" id="quantize-group">
-            <label>Q</label>
-            <div id="quantize-switch" data-position="2" title="Quantize resolution: 1/8, 1/16, 1/32">
-              <div class="q-track">
-                <div class="q-cap"></div>
+          <!-- Header: Branding printed on the metal chassis -->
+          <header id="header">
+            <!-- Chassis logo (top-left) — "HAL-60" nameplate with subtitle -->
+            <div id="header-brand">
+              <div id="brand-nameplate">
+                <span id="brand-name">HAL-60</span>
+                <div id="brand-divider"></div>
+                <span id="brand-subtitle">THE BUMPLER</span>
               </div>
-              <div class="q-labels">
-                <span class="q-label" data-val="8">8</span>
-                <span class="q-label" data-val="16">16</span>
-                <span class="q-label" data-val="32">32</span>
+              <span class="model-desc">SAMPLING PRODUCTION CENTER</span>
+            </div>
+            <!-- Designer branding (top-right): logo + signature -->
+            <div id="header-signature">
+              <div id="logo-container">
+                <img src="assets/logo.png" alt="Halsky Labs" id="logo-img" />
+              </div>
+              <span id="designer-signature">Halsky<br>Labs</span>
+            </div>
+          </header>
+
+          <!-- LCD Dot-Matrix Screen: waveform + progress + transport info -->
+          <section id="lcd-screen">
+
+            <!-- Scanline overlay for CRT / dot-matrix effect -->
+            <div id="lcd-scanlines"></div>
+
+            <!-- Count-in overlay: shows large beat countdown during pre-roll -->
+            <div id="count-in-display"></div>
+
+            <!-- Boot sequence diagnostic text overlay -->
+            <div id="boot-overlay"></div>
+
+            <!-- CRT warm-up horizontal scan bar -->
+            <div id="boot-scanbar"></div>
+
+            <!-- LCD splash / digital branding line -->
+            <div id="lcd-splash">HAL-60 v1.0 // BUMPLER MODE</div>
+
+            <!-- 4-bar loop progress bar with 1/32nd-note grid ticks + slice mode switch -->
+            <div id="loop-progress-row">
+              <div id="loop-progress">
+                <div id="loop-progress-fill"></div>
+                <div id="loop-progress-ticks">
+                  <!-- 128 tick marks will be injected by JS -->
+                </div>
+                <!-- Dim overlay for the inactive zone in 16-slice mode -->
+                <div id="loop-progress-dim"></div>
+              </div>
+              <!-- Digital 2-position toggle: 16-slice (HALF) / 32-slice (FULL) -->
+              <div id="slice-mode-switch" data-mode="32" title="Toggle 16/32 slice loop length">
+                <span class="slice-mode-label" data-val="16">16</span>
+                <div class="slice-mode-track">
+                  <div class="slice-mode-cap"></div>
+                </div>
+                <span class="slice-mode-label" data-val="32">32</span>
               </div>
             </div>
-          </div>
-          <div class="transport-group" id="swing-group">
-            <label>S</label>
-            <div id="swing-switch" data-position="0" title="Swing amount: 50 / 60 / 70">
-              <div class="swing-track">
-                <div class="swing-cap"></div>
-              </div>
-              <div class="swing-labels">
-                <span class="swing-label" data-val="50">50</span>
-                <span class="swing-label" data-val="60">60</span>
-                <span class="swing-label" data-val="70">70</span>
+
+            <!-- Waveform viewer (inside the LCD) -->
+            <div id="waveform-area">
+              <div id="drop-zone">
+                <div id="drop-zone-text">
+                  <p>DROP SAMPLE HERE<br /><small>OR PRESS "LOAD"</small></p>
+                </div>
+                <div id="waveform"></div>
               </div>
             </div>
-          </div>
-          <!-- Mode toggle: PAD grid ↔ TR-style Step Sequencer -->
-          <div class="transport-group" id="mode-switch-group">
-            <label>M</label>
-            <div id="mode-switch" data-position="0" title="Toggle between Pad Grid and Step Sequencer">
-              <div class="mode-track">
-                <div class="mode-cap"></div>
+
+            <!-- Digital controls row inside the LCD (beneath the waveform) -->
+            <div id="lcd-controls">
+              <button id="load-btn" class="lcd-btn" title="Load an audio file">[ LOAD ]</button>
+              <span class="lcd-divider">|</span>
+              <div class="lcd-control-group">
+                <button id="pitch-dec" class="lcd-btn" title="Pitch down">-</button>
+                <span id="pitch-value">PITCH: 0 ST</span>
+                <button id="pitch-inc" class="lcd-btn" title="Pitch up">+</button>
               </div>
-              <div class="mode-labels">
-                <span class="mode-label" data-val="pad">PAD</span>
-                <span class="mode-label" data-val="seq">SEQ</span>
+              <span class="lcd-divider">|</span>
+              <div class="lcd-control-group">
+                <button id="bump-dec" class="lcd-btn" title="Less compression">-</button>
+                <span id="bump-value">BUMP: -24 dB</span>
+                <button id="bump-inc" class="lcd-btn" title="More compression">+</button>
+              </div>
+              <span class="lcd-divider">|</span>
+              <div class="lcd-control-group">
+                <button id="bank-dec" class="lcd-btn" title="Previous drum bank">&lt;</button>
+                <span id="bank-value">BANK: A</span>
+                <button id="bank-inc" class="lcd-btn" title="Next drum bank">&gt;</button>
               </div>
             </div>
-          </div>
+
+            <!-- LCD footer info line -->
+            <div id="lcd-info">
+              <span id="file-name">NO FILE LOADED</span>
+              <span id="lcd-bpm-display">70 BPM</span>
+            </div>
+
+          </section>
+
+          <!-- Hidden file input (used by the digital LOAD button) -->
+          <input type="file" id="file-input" accept="audio/*" hidden />
+
+          <!-- Transport Controls: two distinct horizontal rows -->
+          <section id="transport-section">
+
+            <!-- Row 1: Rhythmic controls (BPM, Click, Quantize, Swing, Note Repeat) -->
+            <div id="transport-row-1">
+              <div class="transport-group" id="bpm-group">
+                <label>BPM</label>
+                <button id="bpm-dec" class="data-entry-btn" title="Decrease BPM">&minus;</button>
+                <input type="number" id="bpm-input" min="60" max="90" value="70" step="1" />
+                <button id="bpm-inc" class="data-entry-btn" title="Increase BPM">+</button>
+              </div>
+              <div class="transport-group" id="metro-group">
+                <button id="metro-btn" title="Toggle metronome click">
+                  <span class="metro-led" id="metronome-led"></span>
+                  CLICK
+                </button>
+              </div>
+              <div class="transport-group" id="quantize-group">
+                <label>Q</label>
+                <div id="quantize-switch" data-position="2" title="Quantize resolution: 1/8, 1/16, 1/32">
+                  <div class="q-track">
+                    <div class="q-cap"></div>
+                  </div>
+                  <div class="q-labels">
+                    <span class="q-label" data-val="8">8</span>
+                    <span class="q-label" data-val="16">16</span>
+                    <span class="q-label" data-val="32">32</span>
+                  </div>
+                </div>
+              </div>
+              <div class="transport-group" id="swing-group">
+                <label>S</label>
+                <div id="swing-switch" data-position="0" title="Swing amount: 50 / 60 / 70">
+                  <div class="swing-track">
+                    <div class="swing-cap"></div>
+                  </div>
+                  <div class="swing-labels">
+                    <span class="swing-label" data-val="50">50</span>
+                    <span class="swing-label" data-val="60">60</span>
+                    <span class="swing-label" data-val="70">70</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Mode toggle: PAD grid ↔ TR-style Step Sequencer -->
+              <div class="transport-group" id="mode-switch-group">
+                <label>M</label>
+                <div id="mode-switch" data-position="0" title="Toggle between Pad Grid and Step Sequencer">
+                  <div class="mode-track">
+                    <div class="mode-cap"></div>
+                  </div>
+                  <div class="mode-labels">
+                    <span class="mode-label" data-val="pad">PAD</span>
+                    <span class="mode-label" data-val="seq">SEQ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: Transport buttons (Rec, Play, Stop, Clear) -->
+            <div id="transport-buttons">
+              <button id="rec-btn" title="Record pad hits into the loop"><span class="btn-icon rec-dot"></span>
+                REC</button>
+              <button id="play-btn" title="Play / loop the sequence"><svg class="btn-icon" viewBox="0 0 10 10"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="1,0.5 9.5,5 1,9.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"
+                    stroke-linejoin="round" />
+                </svg> PLAY</button>
+              <button id="stop-btn" title="Stop playback"><span class="btn-icon stop-sq"></span> STOP</button>
+              <button id="clear-btn" title="Clear sequence">CLR</button>
+            </div>
+
+          </section>
+
+          <!-- Bottom Section: 4x4 Pad Grid -->
+          <section id="pads-section">
+            <div id="pad-grid">
+              <!-- Pads 1-16 will be injected by JS -->
+            </div>
+          </section>
+
+          <!-- Step Sequencer: 4-track TR-style drum machine (hidden by default) -->
+          <section id="step-sequencer" style="display: none;">
+            <!-- Tracks are built dynamically by JS -->
+          </section>
+
         </div>
 
-        <!-- Row 2: Transport buttons (Rec, Play, Stop, Clear) -->
-        <div id="transport-buttons">
-          <button id="rec-btn" title="Record pad hits into the loop"><span class="btn-icon rec-dot"></span> REC</button>
-          <button id="play-btn" title="Play / loop the sequence"><svg class="btn-icon" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><polygon points="1,0.5 9.5,5 1,9.5" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> PLAY</button>
-          <button id="stop-btn" title="Stop playback"><span class="btn-icon stop-sq"></span> STOP</button>
-          <button id="clear-btn" title="Clear sequence">CLR</button>
-        </div>
+        <!-- Right wood end-cheek panel -->
+        <div class="wood-panel wood-right"></div>
 
-      </section>
+      </div>
 
-      <!-- Bottom Section: 4x4 Pad Grid -->
-      <section id="pads-section">
-        <div id="pad-grid">
-          <!-- Pads 1-16 will be injected by JS -->
-        </div>
-      </section>
-
-      <!-- Step Sequencer: 4-track TR-style drum machine (hidden by default) -->
-      <section id="step-sequencer" style="display: none;">
-        <!-- Tracks are built dynamically by JS -->
-      </section>
-
-    </div>
-
-    <!-- Right wood end-cheek panel -->
-    <div class="wood-panel wood-right"></div>
-
-  </div>
+    </div><!-- #scale-wrapper -->
+  </div><!-- #viewport-frame -->
 
   <!-- Wavesurfer.js v7 via CDN (ES module) -->
   <script type="module" src="app.js"></script>
 </body>
+
 </html>
