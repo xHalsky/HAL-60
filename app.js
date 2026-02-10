@@ -26,7 +26,7 @@ const TOTAL_STEPS = BARS * BEATS_PER_BAR * THIRTYSECONDS_PER_BEAT; // 128
 // TR Step Sequencer constants
 const DRUM_TRACKS = 4;
 const SEQ_STEPS = 16;
-const TRACK_NAMES = ["KICK", "SNARE", "HIHAT", "CYMBAL"];
+const TRACK_NAMES = ["KCK", "SNR", "HHT", "CYM"];
 const BANK_NAMES = ["A", "B", "C", "D"];
 
 // Per-pad region colours – pixel-green shades for the LCD display
