@@ -1361,24 +1361,26 @@ svg.btn-icon {
 .seq-steps {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
-  gap: 4px;
+  gap: 3px;
   flex: 1;
 }
 
-/* Individual step button — chunky plastic TR-style */
+/* Individual step button — tall vertical TR-909 rectangle */
 .seq-step {
-  aspect-ratio: 1;
-  border-radius: 3px;
+  height: 42px;
+  border-radius: 2px;
   cursor: pointer;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 5px;
   position: relative;
   transition: background 0.06s, transform 0.06s;
   border: 1px solid #888880;
   box-shadow:
-    0 2px 0 #999990,
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    inset 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset -1px -1px 0 #888880,
+    0 2px 0 #999990;
 }
 
 /* Color group A (steps 1-4, 9-12): light cream */
@@ -1386,7 +1388,7 @@ svg.btn-icon {
   background: #e6e6dc;
 }
 
-/* Color group B (steps 5-8, 13-16): slightly darker */
+/* Color group B (steps 5-8, 13-16): slightly darker gray */
 .seq-step.seq-step-b {
   background: #cccccc;
 }
@@ -1394,37 +1396,46 @@ svg.btn-icon {
 /* Pressed state for step buttons */
 .seq-step:active {
   transform: translateY(1px);
-  box-shadow: 0 0px 0 #999990;
+  box-shadow:
+    inset 1px 1px 0 #888880,
+    inset -1px -1px 0 rgba(255, 255, 255, 0.45),
+    0 0px 0 #999990;
 }
 
-/* LED indicator dot inside each step */
+/* Physical red LED bulb — recessed into top of button */
 .seq-step-led {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #555544;
+  background: #500000;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
   transition: background 0.06s, box-shadow 0.06s;
 }
 
-/* Active step — LED lights up pixel green */
+/* Active step — LED fires bright red with glow */
 .seq-step.active .seq-step-led {
-  background: #33ff33;
+  background: #ff0000;
   box-shadow:
-    0 0 4px rgba(51, 255, 51, 0.6),
-    0 0 8px rgba(51, 255, 51, 0.3);
+    inset 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 0 3px #ff4444,
+    0 0 8px #ff0000;
 }
 
 /* Running playhead — highlights the current column during playback */
 .seq-step.current {
   box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset -1px -1px 0 #888880,
     0 2px 0 #999990,
-    inset 0 0 0 2px rgba(51, 255, 51, 0.4);
+    inset 0 0 0 2px rgba(255, 0, 0, 0.25);
 }
 
+/* Playhead color flash — group A */
 .seq-step.current.seq-step-a {
   background: #f0f0e8;
 }
 
+/* Playhead color flash — group B */
 .seq-step.current.seq-step-b {
   background: #d8d8d8;
 }
