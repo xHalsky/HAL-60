@@ -50,11 +50,21 @@
         <!-- LCD splash / digital branding line -->
         <div id="lcd-splash">HAL-60 v1.0 // BUMPLER MODE</div>
 
-        <!-- 4-bar loop progress bar with 1/32nd-note grid ticks -->
-        <div id="loop-progress">
-          <div id="loop-progress-fill"></div>
-          <div id="loop-progress-ticks">
-            <!-- 128 tick marks will be injected by JS -->
+        <!-- 4-bar loop progress bar with 1/32nd-note grid ticks + slice mode switch -->
+        <div id="loop-progress-row">
+          <div id="loop-progress">
+            <div id="loop-progress-fill"></div>
+            <div id="loop-progress-ticks">
+              <!-- 128 tick marks will be injected by JS -->
+            </div>
+          </div>
+          <!-- Digital 2-position toggle: 16-slice (HALF) / 32-slice (FULL) -->
+          <div id="slice-mode-switch" data-mode="32" title="Toggle 16/32 slice loop length">
+            <span class="slice-mode-label" data-val="16">16</span>
+            <div class="slice-mode-track">
+              <div class="slice-mode-cap"></div>
+            </div>
+            <span class="slice-mode-label" data-val="32">32</span>
           </div>
         </div>
 

@@ -144,6 +144,10 @@ const bankDecBtn = document.getElementById("bank-dec");
 const bankIncBtn = document.getElementById("bank-inc");
 const bankValueEl = document.getElementById("bank-value");
 
+// Slice-mode switch (LCD digital toggle: 16 / 32)
+const sliceModeSwitch = document.getElementById("slice-mode-switch");
+const sliceModeLabels = sliceModeSwitch.querySelectorAll(".slice-mode-label");
+
 // ============================================================
 // STATE
 // ============================================================
@@ -206,6 +210,9 @@ let animFrameID = null;
 
 // Tick elements (for grid flash)
 let tickElements = [];
+
+// Slice-mode: 16 = half-loop (2 bars), 32 = full loop (4 bars)
+let sliceMode = 32;
 
 // Step Sequencer / Drum Machine
 let seqMode = false;
@@ -994,6 +1001,41 @@ bankDecBtn.addEventListener("click", () => setDrumBank(currentDrumBank - 1));
 bankIncBtn.addEventListener("click", () => setDrumBank(currentDrumBank + 1));
 
 // ============================================================
+// SLICE MODE SWITCH — 16 (HALF) ↔ 32 (FULL) loop length
+// 16: playhead wraps after 2 bars; 16 drum steps = entire loop.
+// 32: full 4-bar loop; 16 drum steps = 1 bar.
+// ============================================================
+
+function setSliceMode(mode) {
+  sliceMode = mode;
+  sliceModeSwitch.dataset.mode = String(mode);
+
+  // Update label glow
+  sliceModeLabels.forEach((lbl) => {
+    lbl.classList.toggle("active", Number(lbl.dataset.val) === mode);
+  });
+
+  // Re-render markers for new effective length
+  renderEventMarkers();
+}
+
+// Initialize label state on boot
+setSliceMode(sliceMode);
+
+// Click on the track toggles between 16 and 32
+sliceModeSwitch.querySelector(".slice-mode-track").addEventListener("click", () => {
+  setSliceMode(sliceMode === 32 ? 16 : 32);
+});
+
+// Click on individual labels snaps to that mode
+sliceModeLabels.forEach((lbl) => {
+  lbl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setSliceMode(Number(lbl.dataset.val));
+  });
+});
+
+// ============================================================
 // COUNT-IN ENGINE — 4-Beat Pre-Roll Before Recording
 // Uses the same look-ahead scheduler pattern for precise timing.
 // Plays 4 digital ticks, displays a countdown (4→3→2→1),
@@ -1085,9 +1127,15 @@ function stopCountIn() {
 // SEQUENCER ENGINE — "Golden Standard" Look-Ahead Scheduler
 // ============================================================
 
+// ---- Get effective total steps based on slice mode (16=half, 32=full) ----
+function getEffectiveSteps() {
+  return sliceMode === 16 ? TOTAL_STEPS / 2 : TOTAL_STEPS;
+}
+
 // ---- Get loop duration at current BPM (seconds) ----
 function getLoopDuration() {
-  return (60.0 / bpm) * BEATS_PER_BAR * BARS;
+  const bars = sliceMode === 16 ? BARS / 2 : BARS;
+  return (60.0 / bpm) * BEATS_PER_BAR * bars;
 }
 
 // ---- Advance to next 1/32-note step (with swing at the 16th-note level) ----
@@ -1119,7 +1167,8 @@ function nextNote() {
   }
 
   currentStep++;
-  if (currentStep >= TOTAL_STEPS) {
+  const effectiveSteps = getEffectiveSteps();
+  if (currentStep >= effectiveSteps) {
     currentStep = 0;
     // Pin loop-start to prevent cumulative drift
     loopStartTime = nextNoteTime;
@@ -1144,12 +1193,14 @@ function scheduleNote(step, time) {
     }
   }
 
-  // ---- Drum Pattern: 16 steps span exactly 1 bar (quarter of the 4-bar loop) ----
-  // Fixed interval of 2 internal 32nd-note steps per drum step (= 1 sixteenth note).
-  // 16 sixteenth notes = 4 beats = 1 bar ≈ 3.43s at 70 BPM. Pattern plays 4× per loop.
-  const drumStepInterval = 2;
-  if (barStep % drumStepInterval === 0) {
-    const drumStepIndex = Math.floor(barStep / drumStepInterval);
+  // ---- Drum Pattern: clock speed adapts to slice mode ----
+  // 32 mode: interval=2 → 16 steps per bar, pattern plays 1× per bar (4× per loop).
+  // 16 mode: interval=4 → 16 steps span full 2-bar loop (1:1 with playhead).
+  const effectiveSteps = getEffectiveSteps();
+  const drumStepInterval = sliceMode === 16 ? (effectiveSteps / SEQ_STEPS) : 2;
+  const drumWindowStep = step % effectiveSteps;
+  if (drumWindowStep % drumStepInterval === 0) {
+    const drumStepIndex = Math.floor(drumWindowStep / drumStepInterval) % SEQ_STEPS;
     for (let tr = 0; tr < DRUM_TRACKS; tr++) {
       if (drumPattern[tr][drumStepIndex]) {
         playDrumSound(tr, time);
@@ -1189,8 +1240,9 @@ function scheduleNote(step, time) {
 
         // Record note-repeat hits into the sequence while recording
         if (isRecording) {
-          const s = step % TOTAL_STEPS;
-          if (s >= 0 && s < TOTAL_STEPS) {
+          const effSteps = getEffectiveSteps();
+          const s = step % effSteps;
+          if (s >= 0 && s < effSteps) {
             sequence[s] = padIdx;
           }
         }
@@ -1291,11 +1343,12 @@ function recordEvent(sliceId) {
   // Snap factor: how many 1/32 steps make up the chosen grid division
   // 1/8 = 4 thirty-seconds, 1/16 = 2, 1/32 = 1
   const snapFactor = (quantizeRes === 8) ? 4 : (quantizeRes === 16) ? 2 : 1;
-  let step = (Math.round(rawStep / snapFactor) * snapFactor) % TOTAL_STEPS;
+  const effectiveSteps = getEffectiveSteps();
+  let step = (Math.round(rawStep / snapFactor) * snapFactor) % effectiveSteps;
 
   // Clamp to valid range
   if (step < 0) step = 0;
-  if (step >= TOTAL_STEPS) step = TOTAL_STEPS - 1;
+  if (step >= effectiveSteps) step = effectiveSteps - 1;
 
   sequence[step] = sliceId;
   renderEventMarkers();
@@ -1366,11 +1419,12 @@ function renderEventMarkers() {
   // Remove existing markers
   progressTicksContainer.querySelectorAll(".event-marker").forEach((el) => el.remove());
 
-  for (let i = 0; i < TOTAL_STEPS; i++) {
+  const effectiveSteps = getEffectiveSteps();
+  for (let i = 0; i < effectiveSteps; i++) {
     if (sequence[i] !== null) {
       const marker = document.createElement("div");
       marker.className = "event-marker";
-      marker.style.left = ((i / TOTAL_STEPS) * 100) + "%";
+      marker.style.left = ((i / effectiveSteps) * 100) + "%";
       progressTicksContainer.appendChild(marker);
     }
   }

@@ -263,7 +263,7 @@ body {
 
 /* Hide normal LCD content during boot so only diagnostics show */
 #lcd-screen.booting #lcd-splash,
-#lcd-screen.booting #loop-progress,
+#lcd-screen.booting #loop-progress-row,
 #lcd-screen.booting #waveform-area,
 #lcd-screen.booting #lcd-info {
   visibility: hidden;
@@ -389,13 +389,86 @@ body {
 
 /* ---- Loop Progress Bar (inside the LCD) ---- */
 
+/* Wrapper row that holds the progress bar + slice-mode switch side by side */
+#loop-progress-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #0a160a;
+  background: #0f1f0f;
+}
+
 /* Outer container for the progress bar inside the LCD */
 #loop-progress {
   height: 20px;
   background: #0f1f0f;
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid #0a160a;
+  flex: 1;
+}
+
+/* ---- Digital Slice-Mode Switch (16/32 toggle inside the LCD) ---- */
+
+/* Switch container — sits to the right of the timeline */
+#slice-mode-switch {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  border-left: 1px solid #0a160a;
+}
+
+/* Slice-mode labels (16 / 32) — tiny monospaced digits */
+.slice-mode-label {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #33ff33;
+  opacity: 0.4;
+  letter-spacing: 1px;
+  transition: opacity 0.12s, color 0.12s, text-shadow 0.12s;
+  cursor: pointer;
+}
+
+/* Active label — bright phosphor glow */
+.slice-mode-label.active {
+  color: #ccffcc;
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(51, 255, 51, 0.7);
+}
+
+/* Recessed dark track for the digital switch */
+.slice-mode-track {
+  width: 20px;
+  height: 8px;
+  background: #0a160a;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Sliding cap — pixel-green glowing indicator */
+.slice-mode-cap {
+  position: absolute;
+  top: 1px;
+  width: 10px;
+  height: 6px;
+  border-radius: 3px;
+  background: #33ff33;
+  box-shadow: 0 0 4px rgba(51, 255, 51, 0.6);
+  transition: left 0.12s ease;
+}
+
+/* Position 0 = 16 (left) */
+#slice-mode-switch[data-mode="16"] .slice-mode-cap {
+  left: 1px;
+}
+
+/* Position 1 = 32 (right, default) */
+#slice-mode-switch[data-mode="32"] .slice-mode-cap {
+  left: 9px;
 }
 
 /* Moving fill that represents current loop position */
