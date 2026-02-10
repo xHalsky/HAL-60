@@ -493,6 +493,25 @@ body {
   pointer-events: none;
 }
 
+/* Dim overlay — covers the inactive second half of the timeline in 16-slice mode */
+#loop-progress-dim {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(10, 22, 10, 0.82);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+/* Show the dim overlay when the slice-mode switch is set to 16 */
+#loop-progress.half-mode #loop-progress-dim {
+  opacity: 1;
+}
+
 /* Individual grid tick mark (base style for all resolutions) */
 .progress-tick {
   position: absolute;

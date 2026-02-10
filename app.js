@@ -319,9 +319,12 @@ function buildStepSequencer() {
 buildStepSequencer();
 
 // ============================================================
-// BUILD PROGRESS BAR TICK MARKS (128 × 1/32nd note grid, 4 bars)
+// BUILD PROGRESS BAR TICK MARKS (64 × 1/32nd note grid, 2 bars)
+// The visual timeline always represents 32 slices (2 bars).
 // Four-level hierarchy: bar → beat → 16th → 32nd micro-tick
 // ============================================================
+
+const VISUAL_STEPS = TOTAL_STEPS / 2; // 64 (2 bars of 32nd notes = 32 slices)
 
 function buildProgressTicks() {
   progressTicksContainer.innerHTML = "";
@@ -330,7 +333,7 @@ function buildProgressTicks() {
   const stepsPerBar = THIRTYSECONDS_PER_BEAT * BEATS_PER_BAR; // 32
   const stepsPerBeat = THIRTYSECONDS_PER_BEAT;                 // 8
 
-  for (let i = 0; i < TOTAL_STEPS; i++) {
+  for (let i = 0; i < VISUAL_STEPS; i++) {
     const tick = document.createElement("div");
     tick.className = "progress-tick";
 
@@ -349,7 +352,7 @@ function buildProgressTicks() {
       tick.classList.add("thirtysecond-tick");
     }
 
-    tick.style.left = ((i / TOTAL_STEPS) * 100) + "%";
+    tick.style.left = ((i / VISUAL_STEPS) * 100) + "%";
     progressTicksContainer.appendChild(tick);
     tickElements.push(tick);
   }
@@ -1015,6 +1018,10 @@ function setSliceMode(mode) {
     lbl.classList.toggle("active", Number(lbl.dataset.val) === mode);
   });
 
+  // Toggle the dim overlay on the progress bar (second half grayed out in 16-mode)
+  const loopProgress = document.getElementById("loop-progress");
+  loopProgress.classList.toggle("half-mode", mode === 16);
+
   // Re-render markers for new effective length
   renderEventMarkers();
 }
@@ -1127,14 +1134,17 @@ function stopCountIn() {
 // SEQUENCER ENGINE — "Golden Standard" Look-Ahead Scheduler
 // ============================================================
 
-// ---- Get effective total steps based on slice mode (16=half, 32=full) ----
+// ---- Get effective total steps based on slice mode ----
+// 16-mode = 32 internal steps (1 bar).  32-mode = 64 internal steps (2 bars).
+// Each "slice" = 2 internal 32nd-note steps = one 1/16th note.
 function getEffectiveSteps() {
-  return sliceMode === 16 ? TOTAL_STEPS / 2 : TOTAL_STEPS;
+  return sliceMode === 16 ? TOTAL_STEPS / 4 : TOTAL_STEPS / 2;
 }
 
 // ---- Get loop duration at current BPM (seconds) ----
+// Derived purely from BPM × bars.  Step duration never changes with mode.
 function getLoopDuration() {
-  const bars = sliceMode === 16 ? BARS / 2 : BARS;
+  const bars = sliceMode === 16 ? 1 : 2;
   return (60.0 / bpm) * BEATS_PER_BAR * bars;
 }
 
@@ -1193,11 +1203,12 @@ function scheduleNote(step, time) {
     }
   }
 
-  // ---- Drum Pattern: clock speed adapts to slice mode ----
-  // 32 mode: interval=2 → 16 steps per bar, pattern plays 1× per bar (4× per loop).
-  // 16 mode: interval=4 → 16 steps span full 2-bar loop (1:1 with playhead).
+  // ---- Drum Pattern: fixed 1/16th-note clock (BPM-locked, mode-independent) ----
+  // drumStepInterval=2 always: each drum step = 2 internal 32nds = one 1/16th note.
+  // 16 mode (32 steps): 16 drum steps fill the entire 1-bar loop (1:1 sync).
+  // 32 mode (64 steps): 16 drum steps fill 1 bar; pattern plays twice per 2-bar loop.
   const effectiveSteps = getEffectiveSteps();
-  const drumStepInterval = sliceMode === 16 ? (effectiveSteps / SEQ_STEPS) : 2;
+  const drumStepInterval = 2;
   const drumWindowStep = step % effectiveSteps;
   if (drumWindowStep % drumStepInterval === 0) {
     const drumStepIndex = Math.floor(drumWindowStep / drumStepInterval) % SEQ_STEPS;
@@ -1395,7 +1406,11 @@ function updateVisuals() {
     const elapsed = audioCtx.currentTime - loopStartTime;
     const loopDur = getLoopDuration();
     const progress = Math.min(1, Math.max(0, elapsed / loopDur));
-    progressFill.style.width = (progress * 100) + "%";
+
+    // In 16-mode the active zone is the first 50% of the physical bar;
+    // in 32-mode the fill spans the full width.
+    const maxWidth = sliceMode === 16 ? 50 : 100;
+    progressFill.style.width = (progress * maxWidth) + "%";
   }
   animFrameID = requestAnimationFrame(updateVisuals);
 }
@@ -1420,11 +1435,14 @@ function renderEventMarkers() {
   progressTicksContainer.querySelectorAll(".event-marker").forEach((el) => el.remove());
 
   const effectiveSteps = getEffectiveSteps();
+  // In 16-mode markers occupy the first 50% of the bar width;
+  // in 32-mode they span the full width.
+  const maxWidth = sliceMode === 16 ? 50 : 100;
   for (let i = 0; i < effectiveSteps; i++) {
     if (sequence[i] !== null) {
       const marker = document.createElement("div");
       marker.className = "event-marker";
-      marker.style.left = ((i / effectiveSteps) * 100) + "%";
+      marker.style.left = ((i / effectiveSteps) * maxWidth) + "%";
       progressTicksContainer.appendChild(marker);
     }
   }
