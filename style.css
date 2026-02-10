@@ -33,7 +33,7 @@ body {
    Wraps the wood side panels and the main metal body.
    ======================================================== */
 
-/* Fixed-width sampler chassis — rigid 850px, centered, studio-depth shadow */
+/* Fixed-width sampler chassis — rigid, centered, studio-depth shadow */
 #chassis {
   display: flex;
   width: 700px;
