@@ -764,7 +764,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
 }
 
@@ -800,7 +800,7 @@ body {
 
 /* Cap positions (set via JS data-position attribute) */
 #quantize-switch[data-position="0"] .q-cap {
-  left: 2px;
+  left: 3px;
 }
 
 #quantize-switch[data-position="1"] .q-cap {
@@ -808,7 +808,7 @@ body {
 }
 
 #quantize-switch[data-position="2"] .q-cap {
-  left: 36px;
+  left: 35px;
 }
 
 /* Position labels row beneath the track */
@@ -846,7 +846,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
 }
 
@@ -882,7 +882,7 @@ body {
 
 /* Cap positions (set via JS data-position attribute) */
 #swing-switch[data-position="0"] .swing-cap {
-  left: 2px;
+  left: 3px;
 }
 
 #swing-switch[data-position="1"] .swing-cap {
@@ -890,7 +890,7 @@ body {
 }
 
 #swing-switch[data-position="2"] .swing-cap {
-  left: 36px;
+  left: 35px;
 }
 
 /* Position labels row beneath the track */
@@ -932,9 +932,16 @@ body {
 /* Shared base style for transport buttons – cream hardware button, equal width */
 #transport-buttons button {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
   border: 1px solid #888880;
+  border-bottom: 3px solid #999999;
+  border-right: 2px solid #999999;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 0 12px;
   font-size: 0.7rem;
   font-weight: 800;
   cursor: pointer;
@@ -949,10 +956,39 @@ body {
     0 3px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Fixed-size icon container inside transport buttons — matches text cap-height */
+.btn-icon {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* REC – perfect circle */
+.rec-dot {
+  background: currentColor;
+  border-radius: 50%;
+}
+
+/* PLAY – inline SVG triangle with rounded corners */
+svg.btn-icon {
+  fill: currentColor;
+  overflow: visible;
+}
+
+/* STOP – soft-edge filled square */
+.stop-sq {
+  background: currentColor;
+  border-radius: 2px;
+}
+
 /* Pressed state for transport buttons */
 #transport-buttons button:active {
   box-shadow: 0 0px 0 #999990;
   transform: translateY(2px);
+  border-bottom-width: 1px;
+  border-right-width: 1px;
 }
 
 /* Record button – default (inactive) */
@@ -1204,7 +1240,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
 }
 
@@ -1212,7 +1248,7 @@ body {
 .mode-labels {
   display: flex;
   justify-content: space-between;
-  width: 56px;
+  width: 46px;
 }
 
 /* Individual PAD / SEQ label */
@@ -1237,7 +1273,7 @@ body {
 
 /* Recessed dark track for the sliding cap — same dimensions as Q and SWING */
 .mode-track {
-  width: 56px;
+  width: 46px;
   height: 16px;
   background: #222222;
   border-radius: 4px;
@@ -1267,11 +1303,11 @@ body {
 
 /* Cap positions (set via JS data-position attribute) */
 #mode-switch[data-position="0"] .mode-cap {
-  left: 2px;
+  left: 3px;
 }
 
 #mode-switch[data-position="1"] .mode-cap {
-  left: 38px;
+  left: 26px;
 }
 
 /* ========================================================
